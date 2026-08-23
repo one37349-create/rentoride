@@ -25,6 +25,25 @@
 
   <p id="message"></p>
 
+  <div id="profile" style="display:none;">
+    <h2>My Profile</h2>
+
+    <p>
+      Name:
+      <span id="profileName"></span>
+    </p>
+
+    <p>
+      Email:
+      <span id="profileEmail"></span>
+    </p>
+
+    <p>
+      Phone:
+      <span id="profilePhone"></span>
+    </p>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://axvttcxrhsblvkmcnqgb.supabase.co";
     const SUPABASE_KEY = "sb_publishable_Nn7T1_HByXSy9Vrxy4XgoA_KlsJAafa";
@@ -36,6 +55,16 @@
 
     const message = document.getElementById("message");
 
+    const profile = document.getElementById("profile");
+    const profileName = document.getElementById("profileName");
+    const profileEmail = document.getElementById("profileEmail");
+    const profilePhone = document.getElementById("profilePhone");
+
+
+    // =========================
+    // SIGN UP
+    // =========================
+
     document.getElementById("signupBtn").addEventListener("click", async () => {
 
       const email = document.getElementById("email").value.trim();
@@ -45,14 +74,15 @@
         message.innerText = "Please enter email and password.";
         return;
       }
-      console.log("Signup button clicked");
-      
-      const { error } = await supabaseClient.auth.signUp({
+
+      message.innerText = "Creating account...";
+
+      const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: password
       });
-      
-      console.log("Signup response:", error);
+
+      console.log("Signup response:", data, error);
 
       if (error) {
         message.innerText = error.message;
@@ -60,6 +90,11 @@
         message.innerText = "Signup successful! Check your email.";
       }
     });
+
+
+    // =========================
+    // LOGIN
+    // =========================
 
     document.getElementById("loginBtn").addEventListener("click", async () => {
 
@@ -71,17 +106,55 @@
         return;
       }
 
-      const { error } = await supabaseClient.auth.signInWithPassword({
+      message.innerText = "Logging in...";
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
       });
 
+      console.log("Login response:", data, error);
+
       if (error) {
         message.innerText = error.message;
-      } else {
-        message.innerText = "Login successful!";
+        return;
       }
+
+      message.innerText = "Login successful!";
+
+      // Get logged-in user's ID
+      const user = data.user;
+
+      if (!user) {
+        message.innerText = "User not found.";
+        return;
+      }
+
+      // Get profile from database
+      const { data: profileData, error: profileError } =
+        await supabaseClient
+          .from("profiles")
+          .select("id, name, email, phone")
+          .eq("id", user.id)
+          .single();
+
+      console.log("Profile response:", profileData, profileError);
+
+      if (profileError) {
+        message.innerText =
+          "Login successful, but profile could not be loaded: " +
+          profileError.message;
+        return;
+      }
+
+      // Show profile
+      profile.style.display = "block";
+
+      profileName.innerText = profileData.name || "Not added";
+      profileEmail.innerText = profileData.email || user.email || "Not added";
+      profilePhone.innerText = profileData.phone || "Not added";
     });
+
   </script>
 
 </body>
