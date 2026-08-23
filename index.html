@@ -45,11 +45,15 @@
         message.innerText = "Please enter email and password.";
         return;
       }
+      console.log("Signup button clicked");
 
+      
       const { error } = await supabaseClient.auth.signUp({
         email: email,
         password: password
       });
+
+      console.log("Signup response:", error);
 
       if (error) {
         message.innerText = error.message;
