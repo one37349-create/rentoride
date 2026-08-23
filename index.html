@@ -1,9 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>RentoRide</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentoRide - Login</title>
 </head>
 <body>
-  <h1>Welcome to RentoRide</h1>
+
+  <h1>RentoRide</h1>
+
+  <h2>Login / Signup</h2>
+
+  <input type="email" id="email" placeholder="Email">
+  <br><br>
+
+  <input type="password" id="password" placeholder="Password">
+  <br><br>
+
+  <button onclick="signup()">Sign Up</button>
+  <button onclick="login()">Login</button>
+  <button onclick="logout()">Logout</button>
+
+  <p id="message"></p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "YOUR_PROJECT_URL";
+    const SUPABASE_KEY = "YOUR_PUBLISHABLE_KEY";
+
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    async function signup() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password
+      });
+
+      document.getElementById("message").innerText =
+        error ? error.message : "Signup successful! Check your email.";
+    }
+
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      document.getElementById("message").innerText =
+        error ? error.message : "Login successful!";
+    }
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      document.getElementById("message").innerText = "Logged out.";
+    }
+  </script>
+
 </body>
 </html>
