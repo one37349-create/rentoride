@@ -402,7 +402,9 @@ async function loadBikes() {
       <p>Brand: ${bike.brand}</p>
       <p>₹${bike.price_per_day} / day</p>
       <p>📍 ${bike.location}</p>
-      <button>Book Now</button>
+      <button onclick="bookBike('${bike.id}', ${bike.price_per_day})">
+  Book Now
+</button>
     `;
 
     bikeList.appendChild(card);
