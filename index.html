@@ -205,7 +205,7 @@
 
       const user = data.user;
       console.log("Logged in user:", user);
-
+      await loadMyBookings();
       if (!user) {
 
         message.innerText = "User not found.";
