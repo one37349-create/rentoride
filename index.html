@@ -24,37 +24,42 @@
   <button id="loginBtn">Login</button>
 
   <p id="message"></p>
+
   <hr>
-<button id="addBikeBtn">+ Add Your Bike</button>
-<div id="bikeForm" style="display:none;">
 
-  <h3>Add Your Bike</h3>
+  <button id="addBikeBtn">+ Add Your Bike</button>
 
-  <input type="text" id="bikeName" placeholder="Bike Name">
-  <br><br>
+  <div id="bikeForm" style="display:none;">
 
-  <input type="text" id="bikeBrand" placeholder="Brand">
-  <br><br>
+    <h3>Add Your Bike</h3>
 
-  <input type="number" id="bikePrice" placeholder="Price per day">
-  <br><br>
+    <input type="text" id="bikeName" placeholder="Bike Name">
+    <br><br>
 
-  <input type="text" id="bikeLocation" placeholder="Location">
-  <br><br>
+    <input type="text" id="bikeBrand" placeholder="Brand">
+    <br><br>
 
-  <input type="text" id="bikeImage" placeholder="Bike Image URL">
-  <br><br>
+    <input type="number" id="bikePrice" placeholder="Price per day">
+    <br><br>
 
-  <button id="saveBikeBtn">Save Bike</button>
+    <input type="text" id="bikeLocation" placeholder="Location">
+    <br><br>
 
-</div>
-<h2>Available Bikes</h2>
+    <input type="text" id="bikeImage" placeholder="Bike Image URL">
+    <br><br>
 
-<div id="bikeList">
-  Loading bikes...
-</div>
+    <button id="saveBikeBtn">Save Bike</button>
+
+  </div>
+
+  <h2>Available Bikes</h2>
+
+  <div id="bikeList">
+    Loading bikes...
+  </div>
 
   <div id="profile" style="display:none;">
+
     <h2>My Profile</h2>
 
     <p>
@@ -71,10 +76,14 @@
       Phone:
       <span id="profilePhone"></span>
     </p>
+
   </div>
 
+
   <script>
+
     const SUPABASE_URL = "https://axvttcxrhsblvkmcnqgb.supabase.co";
+
     const SUPABASE_KEY = "sb_publishable_Nn7T1_HByXSy9Vrxy4XgoA_KlsJAafa";
 
     const supabaseClient = window.supabase.createClient(
@@ -82,11 +91,15 @@
       SUPABASE_KEY
     );
 
+
     const message = document.getElementById("message");
 
     const profile = document.getElementById("profile");
+
     const profileName = document.getElementById("profileName");
+
     const profileEmail = document.getElementById("profileEmail");
+
     const profilePhone = document.getElementById("profilePhone");
 
 
@@ -97,27 +110,44 @@
     document.getElementById("signupBtn").addEventListener("click", async () => {
 
       const email = document.getElementById("email").value.trim();
+
       const password = document.getElementById("password").value;
 
+
       if (!email || !password) {
+
         message.innerText = "Please enter email and password.";
+
         return;
+
       }
+
 
       message.innerText = "Creating account...";
 
+
       const { data, error } = await supabaseClient.auth.signUp({
+
         email: email,
+
         password: password
+
       });
+
 
       console.log("Signup response:", data, error);
 
+
       if (error) {
+
         message.innerText = error.message;
+
       } else {
-        message.innerText = "Signup successful! Check your email.";
+
+        message.innerText = "Signup successful!";
+
       }
+
     });
 
 
@@ -128,108 +158,220 @@
     document.getElementById("loginBtn").addEventListener("click", async () => {
 
       const email = document.getElementById("email").value.trim();
+
       const password = document.getElementById("password").value;
 
+
       if (!email || !password) {
+
         message.innerText = "Please enter email and password.";
+
         return;
+
       }
+
 
       message.innerText = "Logging in...";
 
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
 
       console.log("Login response:", data, error);
 
+
       if (error) {
+
         message.innerText = error.message;
+
         return;
+
       }
+
 
       message.innerText = "Login successful!";
 
-      // Get logged-in user's ID
+
       const user = data.user;
 
+
       if (!user) {
+
         message.innerText = "User not found.";
+
         return;
+
       }
 
-      // Get profile from database
+
       const { data: profileData, error: profileError } =
         await supabaseClient
+
           .from("profiles")
+
           .select("id, name, email, phone")
+
           .eq("id", user.id)
+
           .single();
+
 
       console.log("Profile response:", profileData, profileError);
 
+
       if (profileError) {
+
         message.innerText =
           "Login successful, but profile could not be loaded: " +
           profileError.message;
+
         return;
+
       }
 
-      // Show profile
+
       profile.style.display = "block";
 
-      profileName.innerText = profileData.name || "Not added";
-      profileEmail.innerText = profileData.email || user.email || "Not added";
-      profilePhone.innerText = profileData.phone || "Not added";
+
+      profileName.innerText =
+        profileData.name || "Not added";
+
+
+      profileEmail.innerText =
+        profileData.email || user.email || "Not added";
+
+
+      profilePhone.innerText =
+        profileData.phone || "Not added";
+
     });
 
-  </script>
+
+    // =========================
+    // OPEN BIKE FORM
+    // =========================
 
     document.getElementById("addBikeBtn").addEventListener("click", () => {
+
       document.getElementById("bikeForm").style.display = "block";
-    });
-document.getElementById("saveBikeBtn").addEventListener("click", async () => {
 
-  const bikeName = document.getElementById("bikeName").value.trim();
-  const bikeBrand = document.getElementById("bikeBrand").value.trim();
-  const bikePrice = document.getElementById("bikePrice").value;
-  const bikeLocation = document.getElementById("bikeLocation").value.trim();
-  const bikeImage = document.getElementById("bikeImage").value.trim();
-
-  if (!bikeName || !bikeBrand || !bikePrice || !bikeLocation) {
-    message.innerText = "Please fill all required fields.";
-    return;
-  }
-
-  const { data: userData } = await supabaseClient.auth.getUser();
-
-  if (!userData.user) {
-    message.innerText = "Please login first.";
-    return;
-  }
-
-  const { error } = await supabaseClient
-    .from("bikes")
-    .insert({
-      owner_id: userData.user.id,
-      bike_name: bikeName,
-      brand: bikeBrand,
-      price_per_day: Number(bikePrice),
-      location: bikeLocation,
-      image_url: bikeImage
     });
 
-  if (error) {
-    message.innerText = error.message;
-    return;
-  }
 
-  message.innerText = "Bike added successfully!";
+    // =========================
+    // SAVE BIKE
+    // =========================
 
-  document.getElementById("bikeForm").style.display = "none";
+    document.getElementById("saveBikeBtn").addEventListener("click", async () => {
 
-});
+      const bikeName =
+        document.getElementById("bikeName").value.trim();
+
+
+      const bikeBrand =
+        document.getElementById("bikeBrand").value.trim();
+
+
+      const bikePrice =
+        document.getElementById("bikePrice").value;
+
+
+      const bikeLocation =
+        document.getElementById("bikeLocation").value.trim();
+
+
+      const bikeImage =
+        document.getElementById("bikeImage").value.trim();
+
+
+      if (!bikeName || !bikeBrand || !bikePrice || !bikeLocation) {
+
+        message.innerText =
+          "Please fill all required fields.";
+
+        return;
+
+      }
+
+
+      const { data: userData } =
+        await supabaseClient.auth.getUser();
+
+
+      if (!userData.user) {
+
+        message.innerText =
+          "Please login first.";
+
+        return;
+
+      }
+
+
+      message.innerText =
+        "Adding bike...";
+
+
+      const { error } =
+        await supabaseClient
+
+          .from("bikes")
+
+          .insert({
+
+            owner_id: userData.user.id,
+
+            bike_name: bikeName,
+
+            brand: bikeBrand,
+
+            price_per_day: Number(bikePrice),
+
+            location: bikeLocation,
+
+            image_url: bikeImage
+
+          });
+
+
+      if (error) {
+
+        message.innerText =
+          error.message;
+
+        return;
+
+      }
+
+
+      message.innerText =
+        "Bike added successfully!";
+
+
+      document.getElementById("bikeForm").style.display =
+        "none";
+
+
+      document.getElementById("bikeName").value = "";
+
+      document.getElementById("bikeBrand").value = "";
+
+      document.getElementById("bikePrice").value = "";
+
+      document.getElementById("bikeLocation").value = "";
+
+      document.getElementById("bikeImage").value = "";
+
+    });
+
   </script>
+
 </body>
 </html>
