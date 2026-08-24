@@ -189,7 +189,47 @@
     document.getElementById("addBikeBtn").addEventListener("click", () => {
       document.getElementById("bikeForm").style.display = "block";
     });
+document.getElementById("saveBikeBtn").addEventListener("click", async () => {
 
+  const bikeName = document.getElementById("bikeName").value.trim();
+  const bikeBrand = document.getElementById("bikeBrand").value.trim();
+  const bikePrice = document.getElementById("bikePrice").value;
+  const bikeLocation = document.getElementById("bikeLocation").value.trim();
+  const bikeImage = document.getElementById("bikeImage").value.trim();
+
+  if (!bikeName || !bikeBrand || !bikePrice || !bikeLocation) {
+    message.innerText = "Please fill all required fields.";
+    return;
+  }
+
+  const { data: userData } = await supabaseClient.auth.getUser();
+
+  if (!userData.user) {
+    message.innerText = "Please login first.";
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("bikes")
+    .insert({
+      owner_id: userData.user.id,
+      bike_name: bikeName,
+      brand: bikeBrand,
+      price_per_day: Number(bikePrice),
+      location: bikeLocation,
+      image_url: bikeImage
+    });
+
+  if (error) {
+    message.innerText = error.message;
+    return;
+  }
+
+  message.innerText = "Bike added successfully!";
+
+  document.getElementById("bikeForm").style.display = "none";
+
+});
   </script>
 </body>
 </html>
