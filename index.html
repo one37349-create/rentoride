@@ -517,7 +517,7 @@ message.innerText = "Login successful!";
 
 loadMyBookings();
     async function cancelBooking(bookingId) {
-
+      alert("Cancel button clicked");
   const { error } = await supabaseClient
     .from("bookings")
     .update({ status: "cancelled" })
