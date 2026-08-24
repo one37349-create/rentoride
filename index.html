@@ -464,7 +464,7 @@ async function bookBike(bikeId, pricePerDay) {
   message.innerText =
     "Booking request submitted! Total: ₹" + amount;
 }
-    async function loadMyBookings() {
+   async function loadMyBookings() {
 
   const bookingList = document.getElementById("myBookings");
 
@@ -515,8 +515,8 @@ async function bookBike(bikeId, pricePerDay) {
 
 message.innerText = "Login successful!";
 
-loadbikes();
-loadmybookings();
+loadMyBookings();
+loadBikes();
   </script>
 
 </body>
