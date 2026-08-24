@@ -379,7 +379,6 @@ async function loadBikes() {
   const { data: bikes, error } = await supabaseClient
     .from("bikes")
     .select("id, bike_name, brand, price_per_day, location, image_url")
-    .order("created_at", { ascending: false });
 
   if (error) {
     bikeList.innerText = error.message;
