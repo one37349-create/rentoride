@@ -370,7 +370,48 @@
       document.getElementById("bikeImage").value = "";
 
     });
+async function loadBikes() {
 
+  const bikeList = document.getElementById("bikeList");
+
+  bikeList.innerHTML = "Loading bikes...";
+
+  const { data: bikes, error } = await supabaseClient
+    .from("bikes")
+    .select("id, bike_name, brand, price_per_day, location, image_url")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    bikeList.innerText = error.message;
+    return;
+  }
+
+  if (!bikes || bikes.length === 0) {
+    bikeList.innerText = "No bikes available.";
+    return;
+  }
+
+  bikeList.innerHTML = "";
+
+  bikes.forEach((bike) => {
+
+    const card = document.createElement("div");
+
+    card.innerHTML = `
+      <hr>
+      <h3>${bike.bike_name}</h3>
+      <p>Brand: ${bike.brand}</p>
+      <p>₹${bike.price_per_day} / day</p>
+      <p>📍 ${bike.location}</p>
+      <button>Book Now</button>
+    `;
+
+    bikeList.appendChild(card);
+
+  });
+}
+
+loadBikes();
   </script>
 
 </body>
