@@ -516,6 +516,22 @@ async function bookBike(bikeId, pricePerDay) {
 message.innerText = "Login successful!";
 
 loadMyBookings();
+    async function cancelBooking(bookingId) {
+
+  const { error } = await supabaseClient
+    .from("bookings")
+    .update({ status: "cancelled" })
+    .eq("id", bookingId);
+
+  if (error) {
+    message.innerText = error.message;
+    return;
+  }
+
+  message.innerText = "Booking cancelled successfully!";
+
+  await loadMyBookings();
+}
 loadBikes();
   </script>
 
