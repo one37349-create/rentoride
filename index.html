@@ -411,7 +411,55 @@ async function loadBikes() {
 
   });
 }
+async function bookBike(bikeId, pricePerDay) {
 
+  const { data: userData } = await supabaseClient.auth.getUser();
+
+  if (!userData.user) {
+    message.innerText = "Please login first.";
+    return;
+  }
+
+  const startDate = prompt("Enter start date (YYYY-MM-DD):");
+
+  if (!startDate) return;
+
+  const endDate = prompt("Enter end date (YYYY-MM-DD):");
+
+  if (!endDate) return;
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (isNaN(start) || isNaN(end) || end < start) {
+    message.innerText = "Please enter valid dates.";
+    return;
+  }
+
+  const days =
+    Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+  const amount = days * Number(pricePerDay);
+
+  const { error } = await supabaseClient
+    .from("bookings")
+    .insert({
+      bike_id: bikeId,
+      user_id: userData.user.id,
+      start_date: startDate,
+      end_date: endDate,
+      amount: amount,
+      status: "pending"
+    });
+
+  if (error) {
+    message.innerText = error.message;
+    return;
+  }
+
+  message.innerText =
+    "Booking request submitted! Total: ₹" + amount;
+}
 loadBikes();
   </script>
 
