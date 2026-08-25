@@ -435,18 +435,16 @@ async function bookBike(bikeId, pricePerDay) {
     return;
   }
 
- const startDate = document.getElementById("startDate").value;
-const pickupTime = document.getElementById("pickupTime").value;
+  const startDate = prompt("Enter start date (YYYY-MM-DD):");
 
-if (!startDate || !pickupTime) return;
+  if (!startDate) return;
 
-const endDate = document.getElementById("endDate").value;
-const dropoffTime = document.getElementById("dropoffTime").value;
+  const endDate = prompt("Enter end date (YYYY-MM-DD):");
 
-if (!endDate || !dropoffTime) return;
+  if (!endDate) return;
 
-  const start = new Date(${startDate}T${pickupTime});
-const end = new Date(${endDate}T${dropoffTime});
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
   if (isNaN(start) || isNaN(end) || end < start) {
     message.innerText = "Please enter valid dates.";
