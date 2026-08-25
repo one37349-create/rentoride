@@ -41,17 +41,7 @@
 
     <input type="number" id="bikePrice" placeholder="Price per day">
     <br><br>
-<input type="number" id="price3h" placeholder="Price for 3 hours">
-<br><br>
 
-<input type="number" id="price6h" placeholder="Price for 6 hours">
-<br><br>
-
-<input type="number" id="price12h" placeholder="Price for 12 hours">
-<br><br>
-
-<input type="number" id="price24h" placeholder="Price for 24 hours">
-<br><br>
     <input type="text" id="bikeLocation" placeholder="Location">
     <br><br>
 
@@ -434,41 +424,26 @@ async function bookBike(bikeId, pricePerDay) {
     return;
   }
 
- const startDate = document.getElementById("startDate").value;
-const pickupTime = document.getElementById("pickupTime").value;
+  const startDate = prompt("Enter start date (YYYY-MM-DD):");
 
-if (!startDate || !pickupTime) return;
+  if (!startDate) return;
 
-const endDate = document.getElementById("endDate").value;
-const dropoffTime = document.getElementById("dropoffTime").value;
+  const endDate = prompt("Enter end date (YYYY-MM-DD):");
 
-if (!endDate || !dropoffTime) return
+  if (!endDate) return;
 
- const start = new Date(${startDate}T${pickupTime});
-const end = new Date(${endDate}T${dropoffTime});
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
   if (isNaN(start) || isNaN(end) || end < start) {
     message.innerText = "Please enter valid dates.";
     return;
   }
 
-  const durationHours = (end - start) / (1000 * 60 * 60);
+  const days =
+    Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-if (durationHours < 3) {
-  message.innerText = "Minimum booking is 3 hours.";
-  return;
-}
-
-const durationHours = (end - start) / (1000 * 60 * 60);
-
-if (durationHours < 3) {
-  message.innerText = "Minimum booking is 3 hours.";
-  return;
-}
-
-const days = durationHours / 24;
-
-const amount = days * Number(pricePerDay)
+  const amount = days * Number(pricePerDay);
 
   const { error } = await supabaseClient
     .from("bookings")
