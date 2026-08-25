@@ -424,26 +424,41 @@ async function bookBike(bikeId, pricePerDay) {
     return;
   }
 
-  const startDate = prompt("Enter start date (YYYY-MM-DD):");
+ const startDate = document.getElementById("startDate").value;
+const pickupTime = document.getElementById("pickupTime").value;
 
-  if (!startDate) return;
+if (!startDate || !pickupTime) return;
 
-  const endDate = prompt("Enter end date (YYYY-MM-DD):");
+const endDate = document.getElementById("endDate").value;
+const dropoffTime = document.getElementById("dropoffTime").value;
 
-  if (!endDate) return;
+if (!endDate || !dropoffTime) return
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+ const start = new Date(${startDate}T${pickupTime});
+const end = new Date(${endDate}T${dropoffTime});
 
   if (isNaN(start) || isNaN(end) || end < start) {
     message.innerText = "Please enter valid dates.";
     return;
   }
 
-  const days =
-    Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  const durationHours = (end - start) / (1000 * 60 * 60);
 
-  const amount = days * Number(pricePerDay);
+if (durationHours < 3) {
+  message.innerText = "Minimum booking is 3 hours.";
+  return;
+}
+
+const durationHours = (end - start) / (1000 * 60 * 60);
+
+if (durationHours < 3) {
+  message.innerText = "Minimum booking is 3 hours.";
+  return;
+}
+
+const days = durationHours / 24;
+
+const amount = days * Number(pricePerDay)
 
   const { error } = await supabaseClient
     .from("bookings")
