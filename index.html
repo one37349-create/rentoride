@@ -562,16 +562,16 @@ const dropoffTime = await new Promise((resolve) => {
     const card = document.createElement("div");
 
     card.innerHTML = `
-      <hr>
-      <p>🏍️ Bike ID: ${booking.bike_id}</p>
-      <p>📅 ${booking.start_date} → ${booking.end_date}</p>
-      <p>💰 ₹${booking.amount}</p>
-      <p>🟡 Status: ${booking.status}</p>
-      <button onclick="cancelBooking('${booking.id}')">
-        Cancel Booking
-      </button>
-    `;
-
+  <hr>
+  <p>🏍️ Bike ID: ${booking.bike_id}</p>
+  <p>📅 Pickup: ${booking.start_date} at ${booking.pickup_time}</p>
+  <p>📅 Drop-off: ${booking.end_date} at ${booking.dropoff_time}</p>
+  <p>💰 ₹${booking.amount}</p>
+  <p>🟡 Status: ${booking.status}</p>
+  <button onclick="cancelBooking('${booking.id}')">
+    Cancel Booking
+  </button>
+`;
     bookingList.appendChild(card);
 
   });
