@@ -442,6 +442,7 @@ const pickupTime = await new Promise((resolve) => {
   const input = document.createElement("input");
 
   input.type = "time";
+  input.setAttribute("step", "60");
   input.style.position = "fixed";
   input.style.left = "50%";
   input.style.top = "50%";
