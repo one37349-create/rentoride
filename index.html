@@ -510,7 +510,13 @@ const dropoffTime = await new Promise((resolve) => {
 });
   const start = new Date(startDate);
   const end = new Date(endDate);
+const pickupDateTime = new Date(${startDate}T${pickupTime});
+const dropoffDateTime = new Date(${endDate}T${dropoffTime});
 
+const hours =
+  (dropoffDateTime - pickupDateTime) / (1000 * 60 * 60);
+
+console.log("Booking duration:", hours, "hours");
   if (isNaN(start) || isNaN(end) || end < start) {
     message.innerText = "Please enter valid dates.";
     return;
