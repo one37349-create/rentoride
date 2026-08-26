@@ -516,7 +516,26 @@ const dropoffTime = await new Promise((resolve) => {
     message.innerText = "Please enter valid dates.";
     return;
   }
+const pickupMinutes =
+  Number(pickupTime.split(":")[0]) * 60 +
+  Number(pickupTime.split(":")[1]);
 
+const dropoffMinutes =
+  Number(dropoffTime.split(":")[0]) * 60 +
+  Number(dropoffTime.split(":")[1]);
+
+let totalMinutes =
+  (end - start) / (1000 * 60) +
+  (dropoffMinutes - pickupMinutes);
+
+if (totalMinutes <= 0) {
+  message.innerText = "Please select a valid drop-off time.";
+  return;
+}
+
+const hours = totalMinutes / 60;
+
+console.log("Booking duration:", hours, "hours");
   const days =
     Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
