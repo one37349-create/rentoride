@@ -461,25 +461,38 @@ const pickupTime = await new Promise((resolve) => {
 const endDate = prompt("Enter end date (YYYY-MM-DD):");
 
 if (!endDate) return;
-  const dropoffTime = await new Promise((resolve) => {
-  const input = document.createElement("input");
+const dropoffTime = await new Promise((resolve) => {
+  const overlay = document.createElement("div");
 
-  input.type = "time";
-  input.style.position = "fixed";
-  input.style.left = "50%";
-  input.style.top = "50%";
-  input.style.transform = "translate(-50%, -50%)";
-  input.style.zIndex = "9999";
+  overlay.style.position = "fixed";
+  overlay.style.left = "0";
+  overlay.style.top = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.background = "white";
+  overlay.style.zIndex = "9999";
+  overlay.style.padding = "30px";
+  overlay.style.boxSizing = "border-box";
+  overlay.innerHTML = `
+    <h3>Select Drop-off Time</h3>
+    <input type="time" id="dropoffClock">
+    <br><br>
+    <button id="confirmDropoffTime">Continue</button>
+  `;
 
-  document.body.appendChild(input);
+  document.body.appendChild(overlay);
 
-  input.focus();
+  document.getElementById("confirmDropoffTime").onclick = () => {
+    const value = document.getElementById("dropoffClock").value;
 
-  input.addEventListener("change", () => {
-    const value = input.value;
-    input.remove();
+    if (!value) {
+      alert("Please select drop-off time.");
+      return;
+    }
+
+    overlay.remove();
     resolve(value);
-  });
+  };
 });
   const start = new Date(startDate);
   const end = new Date(endDate);
