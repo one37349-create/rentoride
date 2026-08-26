@@ -511,7 +511,6 @@ const dropoffTime = await new Promise((resolve) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-console.log("Booking duration:", hours, "hours");
   
   if (isNaN(start) || isNaN(end) || end < start) {
     message.innerText = "Please enter valid dates.";
