@@ -426,6 +426,9 @@ async function loadBikes() {
       <h3>${bike.bike_name}</h3>
       <p>Brand: ${bike.brand}</p>
       <p>₹${bike.price_per_day} / day</p>
+      <p>💰 3 Hours: ₹${bike.price_3h}</p>
+<p>💰 6 Hours: ₹${bike.price_6h}</p>
+<p>💰 12 Hours: ₹${bike.price_12h}</p>
       <p>📍 ${bike.location}</p>
       <button onclick="bookBike('${bike.id}', ${bike.price_per_day})">
   Book Now
