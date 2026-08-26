@@ -403,7 +403,7 @@ async function loadBikes() {
 
   const { data: bikes, error } = await supabaseClient
     .from("bikes")
-    .select("id, bike_name, brand, price_per_day, location, image_url")
+    .select("id, bike_name, brand, price_per_day, price_3h, price_6h, price_12h, location, image_url")
 
   if (error) {
     bikeList.innerText = error.message;
