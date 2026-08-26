@@ -438,7 +438,9 @@ async function bookBike(bikeId, pricePerDay) {
   const startDate = prompt("Enter start date (YYYY-MM-DD):");
 
   if (!startDate) return;
+const pickupTime = prompt("Enter pickup time (HH:MM):");
 
+if (!pickupTime) return;
   const endDate = prompt("Enter end date (YYYY-MM-DD):");
 
   if (!endDate) return;
