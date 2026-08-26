@@ -439,7 +439,7 @@ async function loadBikes() {
 
   });
 }
-async function bookBike(bikeId, pricePerDay) {
+async function bookBike(bikeId, pricePerDay, price3h, price6h, price12h) {
 
   const { data: userData } = await supabaseClient.auth.getUser();
 
