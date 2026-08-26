@@ -559,9 +559,6 @@ const dropoffTime = await new Promise((resolve) => {
 
   bookings.forEach((booking) => {
 
-     const pickupTime = new Date(1970-01-01T${booking.pickup_time});
-  const dropoffTime = new Date(1970-01-01T${booking.dropoff_time});
-    
     const card = document.createElement("div");
 
     card.innerHTML = `
