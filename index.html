@@ -430,7 +430,7 @@ async function loadBikes() {
 <p>💰 6 Hours: ₹${bike.price_6h}</p>
 <p>💰 12 Hours: ₹${bike.price_12h}</p>
       <p>📍 ${bike.location}</p>
-      <button onclick="bookBike('${bike.id}', ${bike.price_per_day})">
+     <button onclick="bookBike('${bike.id}', ${bike.price_per_day}, ${bike.price_3h}, ${bike.price_6h}, ${bike.price_12h})">
   Book Now
 </button>
     `;
