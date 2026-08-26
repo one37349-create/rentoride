@@ -461,6 +461,26 @@ const pickupTime = await new Promise((resolve) => {
 const endDate = prompt("Enter end date (YYYY-MM-DD):");
 
 if (!endDate) return;
+  const dropoffTime = await new Promise((resolve) => {
+  const input = document.createElement("input");
+
+  input.type = "time";
+  input.style.position = "fixed";
+  input.style.left = "50%";
+  input.style.top = "50%";
+  input.style.transform = "translate(-50%, -50%)";
+  input.style.zIndex = "9999";
+
+  document.body.appendChild(input);
+
+  input.focus();
+
+  input.addEventListener("change", () => {
+    const value = input.value;
+    input.remove();
+    resolve(value);
+  });
+});
   const start = new Date(startDate);
   const end = new Date(endDate);
 
