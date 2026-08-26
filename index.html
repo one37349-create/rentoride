@@ -452,25 +452,38 @@ async function bookBike(bikeId, pricePerDay, price3h, price6h, price12h) {
 
 if (!startDate) return;
 const pickupTime = await new Promise((resolve) => {
-  const input = document.createElement("input");
+  const overlay = document.createElement("div");
 
-  input.type = "time";
-  input.setAttribute("step", "60");
-  input.style.position = "fixed";
-  input.style.left = "50%";
-  input.style.top = "50%";
-  input.style.transform = "translate(-50%, -50%)";
-  input.style.zIndex = "9999";
+  overlay.style.position = "fixed";
+  overlay.style.left = "0";
+  overlay.style.top = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.background = "white";
+  overlay.style.zIndex = "9999";
+  overlay.style.padding = "30px";
+  overlay.style.boxSizing = "border-box";
 
-  document.body.appendChild(input);
+  overlay.innerHTML = `
+    <h3>Select Pickup Time</h3>
+    <input type="time" id="pickupClock">
+    <br><br>
+    <button id="confirmPickupTime">Continue</button>
+  `;
 
-  input.focus();
+  document.body.appendChild(overlay);
 
-  input.addEventListener("change", () => {
-    const value = input.value;
-    input.remove();
+  document.getElementById("confirmPickupTime").onclick = () => {
+    const value = document.getElementById("pickupClock").value;
+
+    if (!value) {
+      alert("Please select pickup time.");
+      return;
+    }
+
+    overlay.remove();
     resolve(value);
-  });
+  };
 });
 const endDate = prompt("Enter end date (YYYY-MM-DD):");
 
