@@ -517,6 +517,7 @@ const hours =
   (dropoffDateTime - pickupDateTime) / (1000 * 60 * 60);
 
 console.log("Booking duration:", hours, "hours");
+  
   if (isNaN(start) || isNaN(end) || end < start) {
     message.innerText = "Please enter valid dates.";
     return;
