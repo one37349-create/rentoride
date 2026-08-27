@@ -66,5 +66,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   message.innerText = "Login successful!";
 
+  window.location.href = "index.html";
+
   console.log("Logged in user:", data.user);
 });
