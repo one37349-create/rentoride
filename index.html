@@ -559,6 +559,22 @@ if (availabilityError) {
 } else {
   console.log("Existing bookings:", existingBookings);
 }
+  const newStart = new Date(${startDate}T${pickupTime});
+const newEnd = new Date(${endDate}T${dropoffTime});
+
+const isOverlapping = existingBookings.some((booking) => {
+  if (booking.status === "cancelled") return false;
+
+  const existingStart =
+    new Date(${booking.start_date}T${booking.pickup_time});
+
+  const existingEnd =
+    new Date(${booking.end_date}T${booking.dropoff_time});
+
+  return newStart < existingEnd && newEnd > existingStart;
+});
+
+console.log("Bike already booked:", isOverlapping);
 console.log("Booking duration:", hours, "hours");
   const days =
     Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
