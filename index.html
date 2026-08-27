@@ -560,6 +560,14 @@ if (availabilityError) {
   console.log("Existing bookings:", existingBookings);
 }
 console.log("Booking duration:", hours, "hours");
+  const newStartMinutes =
+  (start.getTime() / 60000) + pickupMinutes;
+
+const newEndMinutes =
+  (end.getTime() / 60000) + dropoffMinutes;
+
+console.log("New booking start:", newStartMinutes);
+console.log("New booking end:", newEndMinutes);
   const days =
     Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
