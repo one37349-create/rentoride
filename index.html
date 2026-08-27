@@ -568,21 +568,6 @@ const newEndMinutes =
 
 console.log("New booking start:", newStartMinutes);
 console.log("New booking end:", newEndMinutes);
-
-  const isOverlapping = existingBookings.some((booking) => {
-  if (booking.status === "cancelled") return false;
-
-  const bookingStart =
-    new Date(${booking.start_date}T${booking.pickup_time}).getTime() / 60000;
-
-  const bookingEnd =
-    new Date(${booking.end_date}T${booking.dropoff_time}).getTime() / 60000;
-
-  return newStartMinutes < bookingEnd &&
-         newEndMinutes > bookingStart;
-});
-
-console.log("Bike already booked:", isOverlapping);
     
   const days =
     Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
