@@ -1,1 +1,30 @@
-/* RentoRide Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Inter, Roboto, Poppins, Arial, sans-serif;
+  background: #F7F5F0;
+  color: #212121;
+  line-height: 1.6;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+}
+
+h1, h2, h3 {
+  color: #212121;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
