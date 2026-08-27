@@ -4,153 +4,1271 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>RentoRide - Rent a Bike</title>
+  <title>RentoRide - Rent a Bike. Ride Your Way.</title>
+  <meta name="description" content="Rent quality bikes at affordable prices with RentoRide. Simple booking, flexible rentals and trusted rides.">
 
+  <link rel="stylesheet" href="css/home.css">
 </head>
 
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <!-- ================= NAVBAR ================= -->
 
-    <div class="logo">
-      🏍️ RentoRide
-    </div>
+  <header class="navbar">
 
-    <div class="nav-links">
-      <a href="home.html">Home</a>
-      <a href="#bikes">Bikes</a>
-      <a href="index.html">Login</a>
-    </div>
+    <div class="nav-container">
 
-    <button class="nav-login">
-      Login / Sign Up
-    </button>
+      <a href="home.html" class="logo">
+        🏍️ <span>Rento</span>Ride
+      </a>
 
-  </nav>
-
-
-  <!-- HERO -->
-  <section class="hero">
-
-    <div class="hero-content">
-
-      <h1>Rent a Bike.<br>Ride Your Way.</h1>
-
-      <p>
-        Find the perfect bike near you and start your journey.
-      </p>
-
-      <button class="hero-btn">
-        Explore Bikes
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+        ☰
       </button>
 
-    </div>
+      <nav class="nav-menu" id="navMenu">
 
-  </section>
+        <a href="home.html">Home</a>
+        <a href="bikes.html">Bikes</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#support">Support</a>
+        <a href="index.html" class="login-link">Login</a>
 
+        <a href="index.html" class="list-bike-btn">
+          List Your Bike
+        </a>
 
-  <!-- FIND A BIKE -->
-  <section class="find-bike">
-
-    <h2>Find Your Perfect Ride</h2>
-
-    <div class="search-box">
-
-      <input
-        type="text"
-        placeholder="📍 Enter your area or city"
-      >
-
-      <button>
-        Search Bikes
-      </button>
+      </nav>
 
     </div>
 
-  </section>
+  </header>
 
 
-  <!-- BIKES -->
-  <section class="bikes-section" id="bikes">
+  <!-- ================= HERO ================= -->
 
-    <h2>Choose Your Perfect Ride</h2>
+  <main>
 
-    <p class="section-subtitle">
-      Explore bikes available near you
-    </p>
+    <section class="hero">
 
-    <div class="bike-grid" id="homeBikeList">
+      <div class="hero-overlay"></div>
 
-      <!-- Bikes will load here -->
+      <div class="hero-content">
 
-    </div>
+        <span class="hero-small">
+          YOUR RIDE. YOUR WAY.
+        </span>
 
-  </section>
+        <h1>
+          Rent a Bike.<br>
+          Ride Your Way.
+        </h1>
 
+        <p>
+          Quality bikes. Simple booking. Affordable rides.
+        </p>
 
-  <!-- WHY RENTORIDE -->
-  <section class="why-section">
+        <div class="hero-buttons">
 
-    <h2>Why Choose RentoRide?</h2>
+          <a href="#find-bike" class="btn btn-primary">
+            FIND A BIKE
+          </a>
 
-    <div class="features">
+          <a href="index.html" class="btn btn-secondary">
+            LIST YOUR BIKE
+          </a>
 
-      <div class="feature-card">
-        <div class="feature-icon">🛡️</div>
-        <h3>Verified Bikes</h3>
-        <p>Ride with confidence with verified vehicle listings.</p>
+        </div>
+
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon">💰</div>
-        <h3>Affordable Prices</h3>
-        <p>Find flexible rental options at competitive prices.</p>
+    </section>
+
+
+    <!-- ================= FIND BIKE ================= -->
+
+    <section class="find-section" id="find-bike">
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <span class="section-label">
+            FIND YOUR RIDE
+          </span>
+
+          <h2>
+            Find Your Perfect Bike
+          </h2>
+
+          <p>
+            Search for bikes available near your location.
+          </p>
+
+        </div>
+
+
+        <div class="search-box">
+
+          <div class="search-field">
+
+            <label for="location">
+              📍 Location
+            </label>
+
+            <input
+              type="text"
+              id="location"
+              placeholder="Enter area or city"
+            >
+
+          </div>
+
+
+          <div class="search-field">
+
+            <label for="pickupDate">
+              📅 Pickup Date
+            </label>
+
+            <input
+              type="date"
+              id="pickupDate"
+            >
+
+          </div>
+
+
+          <div class="search-field">
+
+            <label for="bikeType">
+              🏍️ Bike
+            </label>
+
+            <select id="bikeType">
+
+              <option value="">
+                Any Bike
+              </option>
+
+              <option value="scooter">
+                Scooter
+              </option>
+
+              <option value="commuter">
+                Commuter
+              </option>
+
+              <option value="sports">
+                Sports Bike
+              </option>
+
+              <option value="cruiser">
+                Cruiser
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="search-btn"
+            id="searchBikeBtn"
+          >
+            SEARCH BIKES
+          </button>
+
+        </div>
+
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon">📍</div>
-        <h3>Nearby Bikes</h3>
-        <p>Discover bikes available around your location.</p>
+    </section>
+
+
+    <!-- ================= THREE FEATURE BOXES ================= -->
+
+    <section class="top-features">
+
+      <div class="feature-container">
+
+
+        <div class="info-card">
+
+          <div class="info-icon">
+            🔍
+          </div>
+
+          <span class="info-label">
+            FIND A BIKE
+          </span>
+
+          <h3>
+            Your Perfect Ride Is Waiting
+          </h3>
+
+          <p>
+            Explore bikes available in your area
+            and choose the one that fits your journey.
+          </p>
+
+          <a href="bikes.html" class="text-link">
+            Explore Bikes →
+          </a>
+
+        </div>
+
+
+        <div class="info-card featured-info">
+
+          <div class="info-icon">
+            🏍️
+          </div>
+
+          <span class="info-label">
+            RENTORIDE
+          </span>
+
+          <h3>
+            Easy. Affordable. Reliable.
+          </h3>
+
+          <p>
+            Find a bike, choose your time,
+            book it and enjoy your ride.
+          </p>
+
+          <a href="#how-it-works" class="text-link">
+            How It Works →
+          </a>
+
+        </div>
+
+
+        <div class="info-card">
+
+          <div class="info-icon">
+            💰
+          </div>
+
+          <span class="info-label">
+            EARN NOW
+          </span>
+
+          <h3>
+            Have a Bike? Earn With Us.
+          </h3>
+
+          <p>
+            List your bike on RentoRide and
+            earn whenever it gets rented.
+          </p>
+
+          <a href="index.html" class="text-link">
+            List Your Bike →
+          </a>
+
+        </div>
+
+
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Easy Booking</h3>
-        <p>Simple booking process with no unnecessary steps.</p>
+    </section>
+
+
+    <!-- ================= PERFECT RIDE ================= -->
+
+    <section class="bikes-section">
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <span class="section-label">
+            EXPLORE RIDES
+          </span>
+
+          <h2>
+            Choose Your Perfect Ride
+          </h2>
+
+          <p>
+            Comfortable, reliable and affordable bikes for every journey.
+          </p>
+
+        </div>
+
+
+        <div class="bike-grid" id="featuredBikes">
+
+
+          <!-- BIKE CARD 1 -->
+
+          <article class="bike-card">
+
+            <div class="bike-image">
+
+              <img
+                src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=80"
+                alt="Motorcycle"
+              >
+
+              <span class="bike-badge">
+                POPULAR
+              </span>
+
+            </div>
+
+
+            <div class="bike-content">
+
+              <div class="bike-title-row">
+
+                <h3>
+                  Premium Bike
+                </h3>
+
+                <span class="rating">
+                  ⭐ 4.8
+                </span>
+
+              </div>
+
+              <p class="reviews">
+                Trusted by riders
+              </p>
+
+
+              <div class="bike-features">
+
+                <span>✓ Well Maintained</span>
+                <span>✓ Low Deposit</span>
+                <span>✓ Roadside Assistance</span>
+
+              </div>
+
+
+              <div class="bike-location">
+                📍 Available near you
+              </div>
+
+
+              <div class="bike-bottom">
+
+                <div class="bike-price">
+
+                  <small>
+                    From
+                  </small>
+
+                  <strong>
+                    ₹299
+                  </strong>
+
+                  <small>
+                    / day
+                  </small>
+
+                </div>
+
+
+                <a
+                  href="bikes.html"
+                  class="rent-btn"
+                >
+                  RENT NOW
+                </a>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- BIKE CARD 2 -->
+
+          <article class="bike-card">
+
+            <div class="bike-image">
+
+              <img
+                src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=900&q=80"
+                alt="Scooter"
+              >
+
+              <span class="bike-badge">
+                VALUE
+              </span>
+
+            </div>
+
+
+            <div class="bike-content">
+
+              <div class="bike-title-row">
+
+                <h3>
+                  City Scooter
+                </h3>
+
+                <span class="rating">
+                  ⭐ 4.7
+                </span>
+
+              </div>
+
+              <p class="reviews">
+                Perfect for city rides
+              </p>
+
+
+              <div class="bike-features">
+
+                <span>✓ Fuel Efficient</span>
+                <span>✓ Easy Pickup</span>
+                <span>✓ Well Maintained</span>
+
+              </div>
+
+
+              <div class="bike-location">
+                📍 Available near you
+              </div>
+
+
+              <div class="bike-bottom">
+
+                <div class="bike-price">
+
+                  <small>
+                    From
+                  </small>
+
+                  <strong>
+                    ₹199
+                  </strong>
+
+                  <small>
+                    / day
+                  </small>
+
+                </div>
+
+
+                <a
+                  href="bikes.html"
+                  class="rent-btn"
+                >
+                  RENT NOW
+                </a>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- BIKE CARD 3 -->
+
+          <article class="bike-card">
+
+            <div class="bike-image">
+
+              <img
+                src="https://images.unsplash.com/photo-1558981359-219d6364c9c8?auto=format&fit=crop&w=900&q=80"
+                alt="Cruiser motorcycle"
+              >
+
+              <span class="bike-badge">
+                PREMIUM
+              </span>
+
+            </div>
+
+
+            <div class="bike-content">
+
+              <div class="bike-title-row">
+
+                <h3>
+                  Cruiser Bike
+                </h3>
+
+                <span class="rating">
+                  ⭐ 4.9
+                </span>
+
+              </div>
+
+              <p class="reviews">
+                Great for long rides
+              </p>
+
+
+              <div class="bike-features">
+
+                <span>✓ Comfortable Ride</span>
+                <span>✓ Roadside Assistance</span>
+                <span>✓ Quality Checked</span>
+
+              </div>
+
+
+              <div class="bike-location">
+                📍 Available near you
+              </div>
+
+
+              <div class="bike-bottom">
+
+                <div class="bike-price">
+
+                  <small>
+                    From
+                  </small>
+
+                  <strong>
+                    ₹499
+                  </strong>
+
+                  <small>
+                    / day
+                  </small>
+
+                </div>
+
+
+                <a
+                  href="bikes.html"
+                  class="rent-btn"
+                >
+                  RENT NOW
+                </a>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+        </div>
+
+
+        <div class="center-button">
+
+          <a
+            href="bikes.html"
+            class="outline-btn"
+          >
+            VIEW ALL BIKES
+          </a>
+
+        </div>
+
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon">🤝</div>
-        <h3>Trusted Owners</h3>
-        <p>Connect with verified bike owners.</p>
+    </section>
+
+
+    <!-- ================= EARN ================= -->
+
+    <section class="earn-section">
+
+      <div class="earn-overlay"></div>
+
+      <div class="earn-content">
+
+        <span class="section-label">
+          FOR BIKE OWNERS
+        </span>
+
+        <h2>
+          Have a Bike?<br>
+          Earn With RentoRide.
+        </h2>
+
+        <p>
+          Turn your unused bike into an earning opportunity.
+          List it on RentoRide and connect with riders.
+        </p>
+
+        <a
+          href="index.html"
+          class="btn btn-primary"
+        >
+          LIST YOUR BIKE
+        </a>
+
       </div>
 
-      <div class="feature-card">
-        <div class="feature-icon">🏍️</div>
-        <h3>Wide Choice</h3>
-        <p>Choose from different bikes according to your needs.</p>
+    </section>
+
+
+    <!-- ================= WHY CHOOSE ================= -->
+
+    <section class="why-section">
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <span class="section-label">
+            WHY RENTORIDE
+          </span>
+
+          <h2>
+            Why Choose RentoRide?
+          </h2>
+
+          <p>
+            Everything you need for a simple and reliable bike rental experience.
+          </p>
+
+        </div>
+
+
+        <div class="why-grid">
+
+
+          <div class="why-card">
+
+            <div class="why-icon">
+              🛡️
+            </div>
+
+            <h3>
+              Safe & Verified
+            </h3>
+
+            <p>
+              We focus on trusted users and quality bike listings.
+            </p>
+
+          </div>
+
+
+          <div class="why-card">
+
+            <div class="why-icon">
+              💰
+            </div>
+
+            <h3>
+              Affordable Pricing
+            </h3>
+
+            <p>
+              Choose flexible rental durations at competitive prices.
+            </p>
+
+          </div>
+
+
+          <div class="why-card">
+
+            <div class="why-icon">
+              🏍️
+            </div>
+
+            <h3>
+              Quality Bikes
+            </h3>
+
+            <p>
+              Discover bikes suitable for everyday travel and adventures.
+            </p>
+
+          </div>
+
+
+          <div class="why-card">
+
+            <div class="why-icon">
+              📍
+            </div>
+
+            <h3>
+              Easy Pickup
+            </h3>
+
+            <p>
+              Find bikes near your preferred area and pickup location.
+            </p>
+
+          </div>
+
+
+          <div class="why-card">
+
+            <div class="why-icon">
+              ⚡
+            </div>
+
+            <h3>
+              Simple Booking
+            </h3>
+
+            <p>
+              Select your bike, time and dates without unnecessary steps.
+            </p>
+
+          </div>
+
+
+          <div class="why-card">
+
+            <div class="why-icon">
+              🛟
+            </div>
+
+            <h3>
+              Support
+            </h3>
+
+            <p>
+              Get help with booking, payment and rental-related issues.
+            </p>
+
+          </div>
+
+
+        </div>
+
       </div>
 
-    </div>
-
-  </section>
+    </section>
 
 
-  <!-- FOOTER -->
+    <!-- ================= HOW IT WORKS ================= -->
+
+    <section
+      class="how-section"
+      id="how-it-works"
+    >
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <span class="section-label">
+            SIMPLE PROCESS
+          </span>
+
+          <h2>
+            How It Works
+          </h2>
+
+          <p>
+            Get your ride in just a few simple steps.
+          </p>
+
+        </div>
+
+
+        <div class="steps">
+
+
+          <div class="step">
+
+            <span class="step-number">
+              01
+            </span>
+
+            <div class="step-icon">
+              🔍
+            </div>
+
+            <h3>
+              Choose a Bike
+            </h3>
+
+            <p>
+              Find a bike that matches your needs.
+            </p>
+
+          </div>
+
+
+          <div class="step">
+
+            <span class="step-number">
+              02
+            </span>
+
+            <div class="step-icon">
+              👤
+            </div>
+
+            <h3>
+              Complete Profile
+            </h3>
+
+            <p>
+              Add your details and complete verification.
+            </p>
+
+          </div>
+
+
+          <div class="step">
+
+            <span class="step-number">
+              03
+            </span>
+
+            <div class="step-icon">
+              📅
+            </div>
+
+            <h3>
+              Select Date & Time
+            </h3>
+
+            <p>
+              Choose when you want to pickup and return.
+            </p>
+
+          </div>
+
+
+          <div class="step">
+
+            <span class="step-number">
+              04
+            </span>
+
+            <div class="step-icon">
+              💳
+            </div>
+
+            <h3>
+              Pay Securely
+            </h3>
+
+            <p>
+              Review your total and complete payment.
+            </p>
+
+          </div>
+
+
+          <div class="step">
+
+            <span class="step-number">
+              05
+            </span>
+
+            <div class="step-icon">
+              🏍️
+            </div>
+
+            <h3>
+              Pick Up & Ride
+            </h3>
+
+            <p>
+              Collect your bike and enjoy your journey.
+            </p>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= FAQ ================= -->
+
+    <section class="faq-section">
+
+      <div class="section-container faq-container">
+
+        <div class="section-heading">
+
+          <span class="section-label">
+            HELP CENTER
+          </span>
+
+          <h2>
+            Frequently Asked Questions
+          </h2>
+
+        </div>
+
+
+        <div class="faq-list">
+
+
+          <details class="faq-item">
+
+            <summary>
+              How do I rent a bike?
+              <span>+</span>
+            </summary>
+
+            <p>
+              Choose a bike, check its details, complete your profile,
+              select your date and time, and complete the payment.
+            </p>
+
+          </details>
+
+
+          <details class="faq-item">
+
+            <summary>
+              Is verification required?
+              <span>+</span>
+            </summary>
+
+            <p>
+              Required profile and identity verification will be completed
+              before eligible bookings can be confirmed.
+            </p>
+
+          </details>
+
+
+          <details class="faq-item">
+
+            <summary>
+              How does pickup work?
+              <span>+</span>
+            </summary>
+
+            <p>
+              Pickup details depend on the owner's selected hand-over
+              option and will be shown to the customer at the appropriate stage.
+            </p>
+
+          </details>
+
+
+          <details class="faq-item">
+
+            <summary>
+              Is bike delivery available?
+              <span>+</span>
+            </summary>
+
+            <p>
+              Delivery can be enabled or disabled by the bike owner.
+              If available, the customer will see the delivery option during booking.
+            </p>
+
+          </details>
+
+
+          <details class="faq-item">
+
+            <summary>
+              Can I cancel my booking?
+              <span>+</span>
+            </summary>
+
+            <p>
+              Cancellation availability and refund rules will depend on
+              the final RentoRide cancellation policy.
+            </p>
+
+          </details>
+
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= CONTACT ================= -->
+
+    <section class="contact-section">
+
+      <div class="section-container">
+
+        <div class="contact-box">
+
+          <div class="contact-text">
+
+            <span class="section-label">
+              NEED HELP?
+            </span>
+
+            <h2>
+              We're Here to Help.
+            </h2>
+
+            <p>
+              Have a question about your booking, payment or rental?
+              Our support team is here to help.
+            </p>
+
+          </div>
+
+
+          <div class="contact-actions">
+
+            <a href="tel:+910000000000" class="contact-action">
+              📞
+              <span>
+                <small>Call Us</small>
+                Contact Support
+              </span>
+            </a>
+
+
+            <a href="mailto:support@rentoride.com" class="contact-action">
+              ✉️
+              <span>
+                <small>Email Us</small>
+                support@rentoride.com
+              </span>
+            </a>
+
+
+            <a href="#" class="contact-action">
+              💬
+              <span>
+                <small>WhatsApp</small>
+                Chat With Us
+              </span>
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= SUPPORT ================= -->
+
+    <section
+      class="support-section"
+      id="support"
+    >
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <span class="section-label">
+            RENTORIDE SUPPORT
+          </span>
+
+          <h2>
+            How Can We Help?
+          </h2>
+
+        </div>
+
+
+        <div class="support-grid">
+
+
+          <a href="#" class="support-card">
+
+            <span>📅</span>
+
+            <h3>
+              Booking Help
+            </h3>
+
+            <p>
+              Help with reservations and booking status.
+            </p>
+
+          </a>
+
+
+          <a href="#" class="support-card">
+
+            <span>💳</span>
+
+            <h3>
+              Payment Help
+            </h3>
+
+            <p>
+              Questions about payments and transactions.
+            </p>
+
+          </a>
+
+
+          <a href="#" class="support-card">
+
+            <span>🪪</span>
+
+            <h3>
+              Verification Help
+            </h3>
+
+            <p>
+              Assistance with profile and verification.
+            </p>
+
+          </a>
+
+
+          <a href="#" class="support-card">
+
+            <span>🔄</span>
+
+            <h3>
+              Cancellation
+            </h3>
+
+            <p>
+              Help with cancellations and refund requests.
+            </p>
+
+          </a>
+
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= FOOTER ================= -->
+
   <footer class="footer">
 
-    <h3>🏍️ RentoRide</h3>
+    <div class="footer-container">
 
-    <p>
-      Rent a bike. Ride your way.
-    </p>
 
-    <p class="copyright">
-      © 2026 RentoRide. All rights reserved.
-    </p>
+      <div class="footer-brand">
+
+        <a href="home.html" class="footer-logo">
+          🏍️ RentoRide
+        </a>
+
+        <p>
+          Rent a bike. Ride your way.
+        </p>
+
+      </div>
+
+
+      <div class="footer-column">
+
+        <h3>
+          COMPANY
+        </h3>
+
+        <a href="#">
+          About Us
+        </a>
+
+        <a href="#support">
+          Support
+        </a>
+
+        <a href="#faq">
+          FAQ
+        </a>
+
+        <a href="#contact">
+          Contact Us
+        </a>
+
+      </div>
+
+
+      <div class="footer-column">
+
+        <h3>
+          SERVICES
+        </h3>
+
+        <a href="bikes.html">
+          Rent a Bike
+        </a>
+
+        <a href="index.html">
+          List Your Bike
+        </a>
+
+        <a href="#how-it-works">
+          How It Works
+        </a>
+
+      </div>
+
+
+      <div class="footer-column">
+
+        <h3>
+          LEGAL
+        </h3>
+
+        <a href="#">
+          Terms & Conditions
+        </a>
+
+        <a href="#">
+          Privacy Policy
+        </a>
+
+        <a href="#">
+          Cancellation & Refund
+        </a>
+
+        <a href="#">
+          Rental Guidelines
+        </a>
+
+      </div>
+
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+      <p>
+        © 2026 RentoRide. All Rights Reserved.
+      </p>
+
+      <div class="social-links">
+
+        <a href="#">
+          Instagram
+        </a>
+
+        <a href="#">
+          Facebook
+        </a>
+
+        <a href="#">
+          WhatsApp
+        </a>
+
+      </div>
+
+    </div>
 
   </footer>
+
+
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <script src="js/home.js"></script>
 
 </body>
 </html>
