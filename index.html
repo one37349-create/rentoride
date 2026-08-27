@@ -566,36 +566,7 @@ if (hours <= 3) {
   message.innerText = "Maximum booking duration is 24 hours.";
   return;
 }
-const { data: existingBookings, error: availabilityError } =
-  await supabaseClient
-    .from("bookings")
-    .select("id, start_date, end_date, pickup_time, dropoff_time, status")
-    .eq("bike_id", bikeId)
-    .neq("status", "cancelled");
 
-if (availabilityError) {
-  message.innerText = availabilityError.message;
-  return;
-}
-
-const newStart = new Date(${startDate}T${pickupTime});
-const newEnd = new Date(${endDate}T${dropoffTime});
-
-const isOverlapping = existingBookings.some((booking) => {
-  const existingStart =
-    new Date(${booking.start_date}T${booking.pickup_time});
-
-  const existingEnd =
-    new Date(${booking.end_date}T${booking.dropoff_time});
-
-  return newStart < existingEnd && newEnd > existingStart;
-});
-
-if (isOverlapping) {
-  message.innerText =
-    "This bike is already booked for the selected time.";
-  return;
-}
   const { error } = await supabaseClient
     .from("bookings")
     .insert({
