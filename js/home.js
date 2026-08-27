@@ -1,78 +1,90 @@
-/* =========================================================
-   RENTORIDE HOME PAGE
-   ========================================================= */
-
 /* ================= MOBILE MENU ================= */
 
 const menuToggle = document.getElementById("menuToggle");
 const navMenu = document.getElementById("navMenu");
 
 if (menuToggle && navMenu) {
+
   menuToggle.addEventListener("click", () => {
     navMenu.classList.toggle("active");
   });
-}
 
-
-/* Close mobile menu after clicking a link */
-
-if (navMenu) {
   navMenu.querySelectorAll("a").forEach((link) => {
+
     link.addEventListener("click", () => {
       navMenu.classList.remove("active");
     });
+
   });
+
 }
 
 
-/* ================= SEARCH BIKES ================= */
+/* ================= DATE ================= */
 
-const searchBikeBtn = document.getElementById("searchBikeBtn");
+const pickupDate = document.getElementById("pickupDate");
 
-if (searchBikeBtn) {
-  searchBikeBtn.addEventListener("click", () => {
+if (pickupDate) {
 
-    const locationInput =
-      document.getElementById("location");
+  const today =
+    new Date().toISOString().split("T")[0];
 
-    const pickupDate =
-      document.getElementById("pickupDate");
+  pickupDate.min = today;
 
-    const bikeType =
-      document.getElementById("bikeType");
+}
 
 
-    const locationValue =
-      locationInput ? locationInput.value.trim() : "";
+/* ================= SEARCH ================= */
 
-    const dateValue =
-      pickupDate ? pickupDate.value : "";
+const searchBtn = document.getElementById("searchBtn");
 
-    const bikeTypeValue =
-      bikeType ? bikeType.value : "";
+if (searchBtn) {
 
+  searchBtn.addEventListener("click", () => {
 
-    /*
-      Search page ke liye values URL me bhej rahe hain.
-      Jab bikes.html ready hoga, wahi values use karke
-      actual Supabase filtering connect karenge.
-    */
+    const location =
+      document.getElementById("locationInput").value.trim();
+
+    const date =
+      document.getElementById("pickupDate").value;
+
+    const time =
+      document.getElementById("pickupTime").value;
+
+    const vehicle =
+      document.getElementById("vehicleType").value;
+
 
     const params = new URLSearchParams();
 
 
-    if (locationValue) {
-      params.set("location", locationValue);
+    if (location) {
+      params.set("location", location);
+    }
+
+    if (date) {
+      params.set("date", date);
+    }
+
+    if (time) {
+      params.set("time", time);
     }
 
 
-    if (dateValue) {
-      params.set("date", dateValue);
+    if (vehicle !== "all") {
+      params.set("vehicle", vehicle);
     }
 
 
-    if (bikeTypeValue) {
-      params.set("type", bikeTypeValue);
+    if (vehicle === "car") {
+
+      window.location.href =
+        "cars.html" +
+        (params.toString()
+          ? "?" + params.toString()
+          : "");
+
+      return;
     }
 
 
@@ -83,74 +95,79 @@ if (searchBikeBtn) {
         : "");
 
   });
-}
-
-
-/* ================= MINIMUM DATE ================= */
-
-const pickupDateInput =
-  document.getElementById("pickupDate");
-
-if (pickupDateInput) {
-
-  const today =
-    new Date().toISOString().split("T")[0];
-
-  pickupDateInput.min = today;
 
 }
 
 
-/* ================= FAQ ================= */
+/* ================= NEWSLETTER ================= */
 
-/*
-  FAQ <details> browser ke native system se
-  already open/close hota hai.
-*/
+const subscribeBtn =
+  document.getElementById("subscribeBtn");
 
+if (subscribeBtn) {
 
-/* ================= SCROLL ANIMATION ================= */
+  subscribeBtn.addEventListener("click", () => {
 
-const animatedElements =
-  document.querySelectorAll(
-    ".info-card, .bike-card, .why-card, .step, .support-card"
-  );
+    const emailInput =
+      document.getElementById("newsletterEmail");
 
+    const message =
+      document.getElementById("subscribeMessage");
 
-if ("IntersectionObserver" in window) {
-
-  const observer =
-    new IntersectionObserver(
-      (entries) => {
-
-        entries.forEach((entry) => {
-
-          if (entry.isIntersecting) {
-
-            entry.target.classList.add("show");
-
-            observer.unobserve(entry.target);
-
-          }
-
-        });
-
-      },
-      {
-        threshold: 0.12
-      }
-    );
+    const email =
+      emailInput.value.trim();
 
 
-  animatedElements.forEach((element) => {
+    if (!email) {
 
-    observer.observe(element);
+      message.innerText =
+        "Please enter your email.";
+
+      return;
+    }
+
+
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+    if (!emailPattern.test(email)) {
+
+      message.innerText =
+        "Please enter a valid email.";
+
+      return;
+    }
+
+
+    message.innerText =
+      "Thanks! You're subscribed.";
+
+    emailInput.value = "";
 
   });
 
 }
 
 
-/* ================= CONSOLE ================= */
+/* ================= FOOTER YEAR ================= */
 
-console.log("RentoRide Home Page Loaded Successfully");
+const footerBottom =
+  document.querySelector(".footer-bottom");
+
+if (footerBottom) {
+
+  footerBottom.innerHTML =
+    footerBottom.innerHTML.replace(
+      "2026",
+      new Date().getFullYear()
+    );
+
+}
+
+
+/* ================= PAGE LOAD ================= */
+
+console.log(
+  "RentoRide Premium Home Loaded Successfully"
+);
