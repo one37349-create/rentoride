@@ -1062,3 +1062,46 @@ select {
   }
 
 }
+/* ===== FINAL FILTER FIX ===== */
+
+.filter-box.filter-closed .filter-heading,
+.filter-box.filter-closed .filter-group {
+  display: none !important;
+}
+
+.filter-box.filter-closed {
+  height: auto !important;
+}
+
+@media (min-width: 801px) {
+
+  .page-container {
+    display: grid !important;
+    grid-template-columns: 240px minmax(0, 1fr) !important;
+    width: min(1280px, 94%) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    gap: 25px !important;
+  }
+
+  .filter-box {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .listing-section {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+  }
+
+  .bike-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  .bike-card {
+    width: 100% !important;
+  }
+}
