@@ -1,555 +1,286 @@
-```javascript
-/* =========================================================
-   RentoRide ADMIN LOGIN
-   js/admin-login.js
-   ========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
 
-/*
-  IMPORTANT:
-  - admin.html ko direct open karne par bhi security check
-    admin-dashboard.js mein lagana zaroori hai.
-  - profiles table:
-      id   -> auth.users.id
-      role -> "admin"
-*/
+  const form = document.getElementById("adminLoginForm");
+  const emailInput = document.getElementById("adminEmail");
+  const passwordInput = document.getElementById("adminPassword");
 
+  const loginBtn = document.getElementById("adminLoginBtn");
+  const btnText = loginBtn?.querySelector(".btn-text");
+  const btnLoader = loginBtn?.querySelector(".btn-loader");
 
-// =========================================================
-// SUPABASE CONFIG
-// =========================================================
+  const errorBox = document.getElementById("adminLoginError");
+  const successBox = document.getElementById("adminLoginSuccess");
 
-// Agar tumhare project mein Supabase already kisi common JS
-// file se initialize ho raha hai, toh yahan duplicate client
-// mat banana.
-
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const togglePassword = document.getElementById("togglePassword");
 
 
-// Supabase library check
-if (
-  typeof supabase === "undefined" ||
-  !supabase.createClient
-) {
-  console.error(
-    "Supabase JS library load nahi hui."
-  );
-}
+  /* ===============================
+     PASSWORD SHOW / HIDE
+  =============================== */
 
+  if (togglePassword) {
 
-// Client create
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+    togglePassword.addEventListener("click", () => {
 
+      if (passwordInput.type === "password") {
 
-// =========================================================
-// DOM
-// =========================================================
+        passwordInput.type = "text";
+        togglePassword.textContent = "🙈";
 
-const loginForm =
-  document.getElementById("adminLoginForm");
+      } else {
 
-const emailInput =
-  document.getElementById("adminEmail");
+        passwordInput.type = "password";
+        togglePassword.textContent = "👁";
 
-const passwordInput =
-  document.getElementById("adminPassword");
-
-const rememberInput =
-  document.getElementById("rememberAdmin");
-
-const loginButton =
-  document.getElementById("adminLoginBtn");
-
-const errorMessage =
-  document.getElementById("adminLoginError");
-
-const successMessage =
-  document.getElementById("adminLoginSuccess");
-
-const passwordToggle =
-  document.getElementById("adminPasswordToggle");
-
-
-// =========================================================
-// MESSAGE HELPERS
-// =========================================================
-
-function showError(message) {
-
-  if (!errorMessage) return;
-
-  errorMessage.textContent = message;
-
-  errorMessage.classList.add("show");
-
-  if (successMessage) {
-    successMessage.classList.remove("show");
-  }
-}
-
-
-function showSuccess(message) {
-
-  if (!successMessage) return;
-
-  successMessage.textContent = message;
-
-  successMessage.classList.add("show");
-
-  if (errorMessage) {
-    errorMessage.classList.remove("show");
-  }
-}
-
-
-function clearMessages() {
-
-  if (errorMessage) {
-    errorMessage.classList.remove("show");
-    errorMessage.textContent = "";
-  }
-
-  if (successMessage) {
-    successMessage.classList.remove("show");
-    successMessage.textContent = "";
-  }
-}
-
-
-// =========================================================
-// BUTTON LOADING
-// =========================================================
-
-function setLoading(isLoading) {
-
-  if (!loginButton) return;
-
-  loginButton.disabled = isLoading;
-
-  loginButton.classList.toggle(
-    "loading",
-    isLoading
-  );
-}
-
-
-// =========================================================
-// PASSWORD SHOW / HIDE
-// =========================================================
-
-if (passwordToggle && passwordInput) {
-
-  passwordToggle.addEventListener(
-    "click",
-    function () {
-
-      const isPassword =
-        passwordInput.type === "password";
-
-      passwordInput.type =
-        isPassword
-          ? "text"
-          : "password";
-
-      passwordToggle.textContent =
-        isPassword
-          ? "🙈"
-          : "👁";
-
-      passwordToggle.setAttribute(
-        "aria-label",
-        isPassword
-          ? "Hide password"
-          : "Show password"
-      );
-    }
-  );
-}
-
-
-// =========================================================
-// CHECK CURRENT SESSION
-// =========================================================
-
-async function checkExistingAdminSession() {
-
-  try {
-
-    const {
-      data: {
-        session
       }
-    } =
-      await supabaseClient.auth.getSession();
+
+    });
+
+  }
 
 
-    if (!session) {
+  /* ===============================
+     MESSAGE HELPERS
+  =============================== */
+
+  function showError(message) {
+
+    if (errorBox) {
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+    }
+
+    if (successBox) {
+      successBox.textContent = "";
+      successBox.style.display = "none";
+    }
+
+  }
+
+
+  function showSuccess(message) {
+
+    if (successBox) {
+      successBox.textContent = message;
+      successBox.style.display = "block";
+    }
+
+    if (errorBox) {
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
+
+  }
+
+
+  /* ===============================
+     LOGIN
+  =============================== */
+
+  if (!form) return;
+
+
+  form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+
+    if (!email || !password) {
+
+      showError("Please enter your admin email and password.");
+
       return;
-    }
-
-
-    const isAdmin =
-      await checkAdminRole(
-        session.user.id
-      );
-
-
-    if (isAdmin) {
-
-      window.location.replace(
-        "admin.html"
-      );
-
-    } else {
-
-      await supabaseClient.auth.signOut();
 
     }
 
-  } catch (error) {
 
-    console.error(
-      "Session check error:",
-      error
-    );
+    /* BUTTON LOADING */
 
-  }
-}
+    if (loginBtn) {
+      loginBtn.disabled = true;
+    }
 
+    if (btnText) {
+      btnText.textContent = "Authenticating...";
+    }
 
-// =========================================================
-// CHECK ADMIN ROLE
-// =========================================================
-
-async function checkAdminRole(userId) {
-
-  if (!userId) {
-    return false;
-  }
+    if (btnLoader) {
+      btnLoader.style.display = "flex";
+    }
 
 
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
+    showError("");
 
 
-    if (error) {
+    try {
 
-      console.error(
-        "Admin role query error:",
+      /*
+       * SUPABASE CLIENT
+       *
+       * IMPORTANT:
+       * Ye assume karta hai ki tumhare project me
+       * supabaseClient already available hai.
+       */
+
+      if (typeof supabaseClient === "undefined") {
+
+        throw new Error(
+          "Supabase client not found. Check your Supabase JS setup."
+        );
+
+      }
+
+
+      /* ===============================
+         AUTH LOGIN
+      =============================== */
+
+      const {
+        data,
         error
-      );
+      } = await supabaseClient.auth.signInWithPassword({
 
-      return false;
-    }
-
-
-    if (!data) {
-      return false;
-    }
-
-
-    return (
-      String(data.role)
-        .toLowerCase()
-        .trim()
-      === "admin"
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Admin role check failed:",
-      error
-    );
-
-    return false;
-  }
-}
-
-
-// =========================================================
-// ADMIN LOGIN
-// =========================================================
-
-async function adminLogin() {
-
-  clearMessages();
-
-
-  const email =
-    emailInput
-      ? emailInput.value.trim()
-      : "";
-
-  const password =
-    passwordInput
-      ? passwordInput.value
-      : "";
-
-
-  // -------------------------------------------------------
-  // VALIDATION
-  // -------------------------------------------------------
-
-  if (!email) {
-
-    showError(
-      "Admin email enter karo."
-    );
-
-    if (emailInput) {
-      emailInput.focus();
-    }
-
-    return;
-  }
-
-
-  if (!password) {
-
-    showError(
-      "Password enter karo."
-    );
-
-    if (passwordInput) {
-      passwordInput.focus();
-    }
-
-    return;
-  }
-
-
-  setLoading(true);
-
-
-  try {
-
-    // -----------------------------------------------------
-    // SUPABASE AUTH LOGIN
-    // -----------------------------------------------------
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
+
       });
 
 
-    if (error) {
+      if (error) {
 
-      console.error(
-        "Supabase login error:",
-        error
-      );
+        console.error("Login error:", error);
 
-      showError(
-        "Email ya password incorrect hai."
-      );
-
-      setLoading(false);
-
-      return;
-    }
-
-
-    if (!data || !data.user) {
-
-      showError(
-        "Login complete nahi ho saka."
-      );
-
-      setLoading(false);
-
-      return;
-    }
-
-
-    // -----------------------------------------------------
-    // ADMIN ROLE CHECK
-    // -----------------------------------------------------
-
-    const isAdmin =
-      await checkAdminRole(
-        data.user.id
-      );
-
-
-    // -----------------------------------------------------
-    // NOT ADMIN
-    // -----------------------------------------------------
-
-    if (!isAdmin) {
-
-      await supabaseClient.auth.signOut();
-
-
-      showError(
-        "Access denied. Ye account administrator nahi hai."
-      );
-
-
-      setLoading(false);
-
-      return;
-    }
-
-
-    // -----------------------------------------------------
-    // REMEMBER ADMIN
-    // -----------------------------------------------------
-
-    if (
-      rememberInput &&
-      rememberInput.checked
-    ) {
-
-      localStorage.setItem(
-        "rentoride_admin_remember",
-        "true"
-      );
-
-    } else {
-
-      localStorage.removeItem(
-        "rentoride_admin_remember"
-      );
-    }
-
-
-    // -----------------------------------------------------
-    // SUCCESS
-    // -----------------------------------------------------
-
-    showSuccess(
-      "Admin authentication successful. Opening Command Center..."
-    );
-
-
-    // Small delay so user sees success
-    setTimeout(
-      function () {
-
-        window.location.replace(
-          "admin.html"
+        throw new Error(
+          "Invalid email or password."
         );
-
-      },
-      700
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Admin login failed:",
-      error
-    );
-
-    showError(
-      "Something went wrong. Please try again."
-    );
-
-    setLoading(false);
-
-  }
-
-}
-
-
-// =========================================================
-// FORM SUBMIT
-// =========================================================
-
-if (loginForm) {
-
-  loginForm.addEventListener(
-    "submit",
-    function (event) {
-
-      event.preventDefault();
-
-      adminLogin();
-
-    }
-  );
-
-}
-
-
-// =========================================================
-// ENTER KEY SUPPORT
-// =========================================================
-
-if (passwordInput) {
-
-  passwordInput.addEventListener(
-    "keydown",
-    function (event) {
-
-      if (
-        event.key === "Enter"
-      ) {
-
-        event.preventDefault();
-
-        if (loginForm) {
-          loginForm.requestSubmit();
-        }
 
       }
 
+
+      const user = data.user;
+
+
+      if (!user) {
+
+        throw new Error(
+          "Unable to verify your account."
+        );
+
+      }
+
+
+      /* ===============================
+         GET PROFILE ROLE
+      =============================== */
+
+      const {
+        data: profile,
+        error: profileError
+      } = await supabaseClient
+
+        .from("profiles")
+
+        .select("id, name, email, role")
+
+        .eq("id", user.id)
+
+        .single();
+
+
+      if (profileError || !profile) {
+
+        console.error(
+          "Profile error:",
+          profileError
+        );
+
+        await supabaseClient.auth.signOut();
+
+        throw new Error(
+          "Admin profile not found."
+        );
+
+      }
+
+
+      /* ===============================
+         ADMIN ROLE CHECK
+      =============================== */
+
+      if (
+        String(profile.role).toLowerCase() !== "admin"
+      ) {
+
+        await supabaseClient.auth.signOut();
+
+        throw new Error(
+          "Access denied. This account is not an administrator."
+        );
+
+      }
+
+
+      /* ===============================
+         SUCCESS
+      =============================== */
+
+      showSuccess(
+        "Admin verified. Opening Command Center..."
+      );
+
+
+      if (btnText) {
+        btnText.textContent = "Access Granted ✓";
+      }
+
+
+      /*
+       * Small delay so user can see
+       * successful login message.
+       */
+
+      setTimeout(() => {
+
+        window.location.replace("admin.html");
+
+      }, 700);
+
+
+    } catch (error) {
+
+      console.error(
+        "Admin authentication error:",
+        error
+      );
+
+
+      showError(
+        error.message ||
+        "Unable to login. Please try again."
+      );
+
+
+      /* RESET BUTTON */
+
+      if (loginBtn) {
+        loginBtn.disabled = false;
+      }
+
+      if (btnText) {
+        btnText.textContent =
+          "Access Command Center";
+      }
+
+      if (btnLoader) {
+        btnLoader.style.display = "none";
+      }
+
     }
-  );
 
-}
+  });
 
-
-// =========================================================
-// INITIALIZE
-// =========================================================
-
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
-
-    checkExistingAdminSession();
-
-  }
-);
-
-
-// =========================================================
-// SECURITY NOTE
-// =========================================================
-//
-// Frontend role-check alone is NOT enough.
-//
-// Supabase RLS policies must also protect admin-only
-// database operations.
-//
-// Example concept:
-//
-// profiles.role = "admin"
-//
-// And admin dashboard queries should have appropriate
-// Row Level Security policies.
-//
-// =========================================================
-```
+});
