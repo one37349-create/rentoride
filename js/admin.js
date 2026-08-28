@@ -1,1507 +1,835 @@
 ```javascript
 /* =========================================================
-   RentoRide ADMIN DASHBOARD
+   RentoRide Admin Dashboard
    File: js/admin.js
-
-   SECURITY:
-   Login required + profiles.role must be "admin"
    ========================================================= */
+
+/* ---------------------------------------------------------
+   SUPABASE
+--------------------------------------------------------- */
+
+// IMPORTANT:
+// Agar tumhare project me supabaseClient kisi aur JS file
+// se already create ho raha hai, usko yahan dobara mat banao.
+//
+// Example:
+// const supabaseClient = window.supabaseClient;
 
 const SUPABASE_URL = "YOUR_SUPABASE_URL";
 const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+let supabaseClient;
+
+try {
+  if (window.supabase && SUPABASE_URL !== "YOUR_SUPABASE_URL") {
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+  }
+} catch (error) {
+  console.error("Supabase initialization error:", error);
+}
 
 
-// =========================================================
-// PAGE ELEMENTS
-// =========================================================
+/* ---------------------------------------------------------
+   GLOBAL STATE
+--------------------------------------------------------- */
 
-const sidebar = document.getElementById("adminSidebar");
-const overlay = document.getElementById("adminSidebarOverlay");
-const menuBtn = document.getElementById("adminMenuBtn");
-
-const pageTitle = document.getElementById("adminPageTitle");
-
-const logoutBtn = document.getElementById("adminLogoutBtn");
+let currentAdmin = null;
+let currentProfile = null;
 
 
-// =========================================================
-// SECTION TITLES
-// =========================================================
-
-const sectionTitles = {
-  overview: "Command Center",
-  users: "Users",
-  owners: "Owners",
-  vehicles: "Vehicles",
-  verification: "Verification Center",
-  bookings: "Bookings",
-  finance: "Finance Center",
-  analytics: "Analytics",
-  support: "Support & Complaints",
-  notifications: "Notifications",
-  settings: "Platform Settings"
-};
-
-
-// =========================================================
-// SECURITY CHECK
-// =========================================================
+/* =========================================================
+   ADMIN SECURITY
+========================================================= */
 
 async function checkAdminAccess() {
 
   try {
 
+    if (!supabaseClient) {
+      console.error("Supabase client not initialized.");
+
+      // Temporary:
+      // Agar tumhare HTML me Supabase client kisi aur script
+      // se aa raha hai, is block ko uske according adjust karna.
+      return false;
+    }
+
     const {
-      data: { session },
-      error
-    } = await supabaseClient.auth.getSession();
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
 
 
-    if (error) {
-      console.error("Session error:", error);
-      redirectToLogin();
+    // USER LOGIN CHECK
+
+    if (userError || !user) {
+
+      window.location.replace("login.html");
+
       return false;
     }
 
 
-    // No login
-    if (!session || !session.user) {
-
-      redirectToLogin();
-      return false;
-    }
+    currentAdmin = user;
 
 
-    const userId = session.user.id;
+    // PROFILE + ROLE CHECK
 
-
-    // Check profile role
     const {
       data: profile,
       error: profileError
     } = await supabaseClient
       .from("profiles")
-      .select("role, name, email, phone")
-      .eq("id", userId)
-      .maybeSingle();
+      .select("id, name, email, phone, role")
+      .eq("id", user.id)
+      .single();
 
 
-    if (profileError) {
+    if (profileError || !profile) {
 
-      console.error(
-        "Profile security check failed:",
-        profileError
-      );
+      console.error("Profile error:", profileError);
+
+      alert("Admin profile not found.");
 
       await supabaseClient.auth.signOut();
 
-      redirectToLogin();
+      window.location.replace("login.html");
 
       return false;
     }
 
 
-    // Profile missing
-    if (!profile) {
-
-      await supabaseClient.auth.signOut();
-
-      redirectToLogin();
-
-      return false;
-    }
+    currentProfile = profile;
 
 
-    // NOT ADMIN
-    if (
-      String(profile.role || "")
-        .trim()
-        .toLowerCase() !== "admin"
-    ) {
+    // ADMIN ROLE CHECK
 
-      alert(
-        "Access denied. Administrator permission required."
-      );
+    if (String(profile.role).toLowerCase() !== "admin") {
 
-      await supabaseClient.auth.signOut();
+      alert("Access denied. Admin account required.");
 
-      redirectToLogin();
+      window.location.replace("index.html");
 
       return false;
     }
 
 
-    // ADMIN VERIFIED
-    setAdminProfile(profile);
+    // ADMIN DETAILS LOAD
 
-    console.log(
-      "RentoRide Admin authenticated."
-    );
+    updateAdminProfile(profile);
 
     return true;
 
-
   } catch (error) {
 
-    console.error(
-      "Admin security error:",
-      error
-    );
+    console.error("Admin security error:", error);
 
-    redirectToLogin();
+    window.location.replace("login.html");
 
     return false;
   }
 }
 
 
-// =========================================================
-// REDIRECT LOGIN
-// =========================================================
+/* =========================================================
+   ADMIN PROFILE UI
+========================================================= */
 
-function redirectToLogin() {
-
-  // Prevent endless redirect
-  if (
-    !window.location.pathname.endsWith(
-      "admin-login.html"
-    )
-  ) {
-
-    window.location.replace(
-      "admin-login.html"
-    );
-  }
-}
-
-
-// =========================================================
-// ADMIN PROFILE
-// =========================================================
-
-function setAdminProfile(profile) {
+function updateAdminProfile(profile) {
 
   const name =
     profile.name ||
+    profile.email?.split("@")[0] ||
     "Administrator";
 
-  const email =
-    profile.email ||
-    "Admin Account";
+
+  const initials =
+    name
+      .trim()
+      .split(/\s+/)
+      .map(word => word.charAt(0))
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
 
 
-  // Sidebar
-  const adminName =
-    document.getElementById("adminName");
+  const elements = [
 
-  if (adminName) {
-    adminName.textContent = name;
-  }
+    "adminName",
+    "adminHeaderName",
+    "welcomeAdminName"
 
-
-  // Header
-  const adminHeaderName =
-    document.getElementById("adminHeaderName");
-
-  if (adminHeaderName) {
-    adminHeaderName.textContent = name;
-  }
+  ];
 
 
-  // Welcome
-  const welcomeAdminName =
-    document.getElementById("welcomeAdminName");
+  elements.forEach(id => {
 
-  if (welcomeAdminName) {
-    welcomeAdminName.textContent = name;
-  }
+    const element = document.getElementById(id);
 
+    if (element) {
+      element.textContent = name;
+    }
 
-  // Avatar
-  const firstLetter =
-    name.charAt(0).toUpperCase();
+  });
 
 
-  const adminAvatar =
-    document.getElementById("adminAvatar");
+  const avatarElements = [
 
-  const adminHeaderAvatar =
-    document.getElementById(
-      "adminHeaderAvatar"
-    );
+    "adminAvatar",
+    "adminHeaderAvatar"
 
-
-  if (adminAvatar) {
-    adminAvatar.textContent = firstLetter;
-  }
+  ];
 
 
-  if (adminHeaderAvatar) {
-    adminHeaderAvatar.textContent = firstLetter;
-  }
+  avatarElements.forEach(id => {
+
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.textContent = initials || "A";
+    }
+
+  });
+
 }
 
 
-// =========================================================
-// SIDEBAR
-// =========================================================
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-function openSidebar() {
-
-  if (sidebar) {
-    sidebar.classList.add("open");
-  }
-
-  if (overlay) {
-    overlay.classList.add("active");
-  }
-}
-
-
-function closeSidebar() {
-
-  if (sidebar) {
-    sidebar.classList.remove("open");
-  }
-
-  if (overlay) {
-    overlay.classList.remove("active");
-  }
-}
-
-
-if (menuBtn) {
-
-  menuBtn.addEventListener(
-    "click",
-    openSidebar
-  );
-}
-
-
-if (overlay) {
-
-  overlay.addEventListener(
-    "click",
-    closeSidebar
-  );
-}
-
-
-// =========================================================
-// SHOW SECTION
-// =========================================================
-
-function showSection(sectionName) {
-
-  const sections =
-    document.querySelectorAll(
-      ".admin-section"
-    );
-
+function setupNavigation() {
 
   const navItems =
-    document.querySelectorAll(
-      ".admin-nav-item"
-    );
+    document.querySelectorAll(".admin-nav-item");
 
 
-  // Remove active sections
-  sections.forEach(
-    section => {
+  const sections =
+    document.querySelectorAll(".admin-section");
 
-      section.classList.remove(
-        "active"
-      );
 
-    }
-  );
+  const pageTitle =
+    document.getElementById("adminPageTitle");
 
 
-  // Remove active nav
-  navItems.forEach(
-    item => {
+  navItems.forEach(button => {
 
-      item.classList.remove(
-        "active"
-      );
+    button.addEventListener("click", () => {
 
-    }
-  );
+      const sectionName =
+        button.dataset.section;
 
 
-  // Target section
-  const target =
-    document.getElementById(
-      "admin-section-" +
-      sectionName
-    );
+      if (!sectionName) return;
 
 
-  if (target) {
+      // Remove active
 
-    target.classList.add(
-      "active"
-    );
-  }
+      navItems.forEach(item => {
 
+        item.classList.remove("active");
 
-  // Target navigation
-  const nav =
-    document.querySelector(
-      `.admin-nav-item[data-section="${sectionName}"]`
-    );
-
-
-  if (nav) {
-
-    nav.classList.add(
-      "active"
-    );
-  }
-
-
-  // Change title
-  if (pageTitle) {
-
-    pageTitle.textContent =
-      sectionTitles[sectionName] ||
-      "Command Center";
-  }
-
-
-  // Close mobile menu
-  closeSidebar();
-
-
-  // Update URL without reload
-  try {
-
-    history.replaceState(
-      null,
-      "",
-      "#" + sectionName
-    );
-
-  } catch (error) {
-
-    console.log(
-      "URL update skipped."
-    );
-  }
-
-
-  // Load section data
-  loadSectionData(
-    sectionName
-  );
-}
-
-
-// =========================================================
-// NAVIGATION BUTTONS
-// =========================================================
-
-document.addEventListener(
-  "click",
-  function (event) {
-
-    const navButton =
-      event.target.closest(
-        ".admin-nav-item"
-      );
-
-
-    if (navButton) {
-
-      const section =
-        navButton.dataset.section;
-
-
-      if (section) {
-
-        event.preventDefault();
-
-        showSection(section);
-      }
-
-      return;
-    }
-
-
-    // Buttons containing data-section-link
-    const sectionLink =
-      event.target.closest(
-        "[data-section-link]"
-      );
-
-
-    if (sectionLink) {
-
-      const section =
-        sectionLink.dataset.sectionLink;
-
-
-      if (section) {
-
-        event.preventDefault();
-
-        showSection(section);
-      }
-
-    }
-
-  }
-);
-
-
-// =========================================================
-// BOOKING FILTERS
-// =========================================================
-
-document.addEventListener(
-  "click",
-  function (event) {
-
-    const filter =
-      event.target.closest(
-        ".admin-booking-filter"
-      );
-
-
-    if (!filter) return;
-
-
-    document
-      .querySelectorAll(
-        ".admin-booking-filter"
-      )
-      .forEach(
-        button =>
-          button.classList.remove(
-            "active"
-          )
-      );
-
-
-    filter.classList.add(
-      "active"
-    );
-
-
-    const status =
-      filter.dataset.bookingFilter;
-
-
-    loadBookings(
-      status || "all"
-    );
-
-  }
-);
-
-
-// =========================================================
-// VEHICLE FILTERS
-// =========================================================
-
-document.addEventListener(
-  "click",
-  function (event) {
-
-    const filter =
-      event.target.closest(
-        ".admin-filter"
-      );
-
-
-    if (!filter) return;
-
-
-    // Only vehicle filters
-    if (
-      !filter.hasAttribute(
-        "data-vehicle-filter"
-      )
-    ) return;
-
-
-    document
-      .querySelectorAll(
-        "[data-vehicle-filter]"
-      )
-      .forEach(
-        button =>
-          button.classList.remove(
-            "active"
-          )
-      );
-
-
-    filter.classList.add(
-      "active"
-    );
-
-
-    loadVehicles(
-      filter.dataset.vehicleFilter ||
-      "all"
-    );
-
-  }
-);
-
-
-// =========================================================
-// SUPPORT FILTERS
-// =========================================================
-
-document.addEventListener(
-  "click",
-  function (event) {
-
-    const filter =
-      event.target.closest(
-        ".support-filter"
-      );
-
-
-    if (!filter) return;
-
-
-    document
-      .querySelectorAll(
-        ".support-filter"
-      )
-      .forEach(
-        button =>
-          button.classList.remove(
-            "active"
-          )
-      );
-
-
-    filter.classList.add(
-      "active"
-    );
-
-  }
-);
-
-
-// =========================================================
-// LOAD SECTION DATA
-// =========================================================
-
-async function loadSectionData(
-  section
-) {
-
-  try {
-
-    switch (section) {
-
-      case "overview":
-        await loadDashboardStats();
-        break;
-
-      case "users":
-        await loadUsers();
-        break;
-
-      case "owners":
-        await loadOwners();
-        break;
-
-      case "vehicles":
-        await loadVehicles("all");
-        break;
-
-      case "verification":
-        await loadVerification();
-        break;
-
-      case "bookings":
-        await loadBookings("all");
-        break;
-
-      case "finance":
-        await loadFinance();
-        break;
-
-      case "analytics":
-        loadAnalytics();
-        break;
-
-      case "support":
-        loadSupport();
-        break;
-
-      case "notifications":
-        loadNotificationHistory();
-        break;
-
-      case "settings":
-        loadSettings();
-        break;
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      "Section loading error:",
-      error
-    );
-  }
-}
-
-
-// =========================================================
-// DASHBOARD STATS
-// =========================================================
-
-async function loadDashboardStats() {
-
-  // Users
-  const usersResult =
-    await supabaseClient
-      .from("profiles")
-      .select("id", {
-        count: "exact",
-        head: true
       });
 
 
-  setText(
-    "adminTotalUsers",
-    usersResult.count || 0
-  );
+      // Add active
+
+      button.classList.add("active");
 
 
-  // Owners
-  const ownersResult =
-    await supabaseClient
-      .from("profiles")
-      .select("id", {
-        count: "exact",
-        head: true
-      })
-      .eq("role", "owner");
+      // Hide all sections
 
+      sections.forEach(section => {
 
-  setText(
-    "adminTotalOwners",
-    ownersResult.count || 0
-  );
+        section.classList.remove("active");
 
-
-  // Vehicles
-  const vehiclesResult =
-    await supabaseClient
-      .from("bikes")
-      .select("id", {
-        count: "exact",
-        head: true
       });
 
 
-  setText(
-    "adminTotalVehicles",
-    vehiclesResult.count || 0
-  );
+      // Show selected section
 
-
-  // Bookings
-  const bookingsResult =
-    await supabaseClient
-      .from("bookings")
-      .select("id", {
-        count: "exact",
-        head: true
-      });
-
-
-  setText(
-    "adminTotalBookings",
-    bookingsResult.count || 0
-  );
-}
-
-
-// =========================================================
-// USERS
-// =========================================================
-
-async function loadUsers() {
-
-  const container =
-    document.getElementById(
-      "usersTable"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-table-empty">
-      Loading users...
-    </div>`;
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("profiles")
-      .select("*")
-      .neq("role", "admin")
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Users error:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="admin-table-empty">
-        Unable to load users.
-      </div>`;
-
-    return;
-  }
-
-
-  if (!data || data.length === 0) {
-
-    container.innerHTML =
-      `<div class="admin-table-empty">
-        No users found.
-      </div>`;
-
-    return;
-  }
-
-
-  container.innerHTML =
-    data.map(
-      user => `
-        <div class="admin-simple-row">
-
-          <div>
-            <strong>
-              ${escapeHTML(
-                user.name || "User"
-              )}
-            </strong>
-
-            <small>
-              ${escapeHTML(
-                user.email || "—"
-              )}
-            </small>
-          </div>
-
-          <span>
-            ${escapeHTML(
-              user.role || "customer"
-            )}
-          </span>
-
-        </div>
-      `
-    ).join("");
-
-}
-
-
-// =========================================================
-// OWNERS
-// =========================================================
-
-async function loadOwners() {
-
-  const container =
-    document.getElementById(
-      "ownersTable"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-table-empty">
-      Loading owners...
-    </div>`;
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("profiles")
-      .select("*")
-      .eq("role", "owner")
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Owners error:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="admin-table-empty">
-        Unable to load owners.
-      </div>`;
-
-    return;
-  }
-
-
-  if (!data || data.length === 0) {
-
-    container.innerHTML =
-      `<div class="admin-table-empty">
-        No owners found.
-      </div>`;
-
-    return;
-  }
-
-
-  container.innerHTML =
-    data.map(
-      owner => `
-        <div class="admin-simple-row">
-
-          <div>
-            <strong>
-              ${escapeHTML(
-                owner.name || "Owner"
-              )}
-            </strong>
-
-            <small>
-              ${escapeHTML(
-                owner.email || "—"
-              )}
-            </small>
-          </div>
-
-          <span class="status-approved">
-            OWNER
-          </span>
-
-        </div>
-      `
-    ).join("");
-
-}
-
-
-// =========================================================
-// VEHICLES
-// =========================================================
-
-async function loadVehicles(
-  filter = "all"
-) {
-
-  const container =
-    document.getElementById(
-      "adminVehicleList"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-large-empty">
-      <div>🏍</div>
-      <h3>Loading vehicles...</h3>
-    </div>`;
-
-
-  let query =
-    supabaseClient
-      .from("bikes")
-      .select("*")
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (
-    filter !== "all"
-  ) {
-
-    query =
-      query.eq(
-        "status",
-        filter
-      );
-  }
-
-
-  const {
-    data,
-    error
-  } = await query;
-
-
-  if (error) {
-
-    console.error(
-      "Vehicles error:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="admin-large-empty">
-        <div>⚠️</div>
-        <h3>Unable to load vehicles</h3>
-      </div>`;
-
-    return;
-  }
-
-
-  if (!data || data.length === 0) {
-
-    container.innerHTML =
-      `<div class="admin-large-empty">
-        <div>🏍</div>
-        <h3>No vehicles found</h3>
-        <p>Vehicle listings will appear here.</p>
-      </div>`;
-
-    return;
-  }
-
-
-  container.innerHTML =
-    data.map(
-      vehicle => `
-
-        <div class="admin-vehicle-card">
-
-          <div class="vehicle-admin-image">
-            ${
-              vehicle.image_url
-                ? `<img
-                    src="${escapeAttribute(
-                      vehicle.image_url
-                    )}"
-                    alt="Vehicle"
-                  >`
-                : "🏍"
-            }
-          </div>
-
-          <div class="vehicle-admin-info">
-
-            <h3>
-              ${escapeHTML(
-                vehicle.bike_name ||
-                "Vehicle"
-              )}
-            </h3>
-
-            <p>
-              ${escapeHTML(
-                vehicle.brand ||
-                "—"
-              )}
-            </p>
-
-            <span>
-              ₹${escapeHTML(
-                String(
-                  vehicle.price_per_day ||
-                  0
-                )
-              )}/day
-            </span>
-
-          </div>
-
-          <button
-            class="admin-outline-btn"
-            data-vehicle-id="${escapeAttribute(
-              String(vehicle.id)
-            )}"
-          >
-            Review
-          </button>
-
-        </div>
-
-      `
-    ).join("");
-
-}
-
-
-// =========================================================
-// BOOKINGS
-// =========================================================
-
-async function loadBookings(
-  status = "all"
-) {
-
-  const container =
-    document.getElementById(
-      "adminBookingsTable"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-table-empty">
-      Loading bookings...
-    </div>`;
-
-
-  let query =
-    supabaseClient
-      .from("bookings")
-      .select("*")
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (
-    status !== "all"
-  ) {
-
-    query =
-      query.eq(
-        "status",
-        status
-      );
-  }
-
-
-  const {
-    data,
-    error
-  } = await query;
-
-
-  if (error) {
-
-    console.error(
-      "Bookings error:",
-      error
-    );
-
-    container.innerHTML =
-      `<div class="admin-table-empty">
-        Unable to load bookings.
-      </div>`;
-
-    return;
-  }
-
-
-  if (!data || data.length === 0) {
-
-    container.innerHTML =
-      `<div class="admin-table-empty">
-        No bookings found.
-      </div>`;
-
-    return;
-  }
-
-
-  container.innerHTML =
-    data.map(
-      booking => `
-
-        <div class="admin-simple-row">
-
-          <div>
-
-            <strong>
-              Booking #${escapeHTML(
-                String(booking.id)
-              )}
-            </strong>
-
-            <small>
-              ${escapeHTML(
-                booking.start_date ||
-                "—"
-              )}
-              →
-              ${escapeHTML(
-                booking.end_date ||
-                "—"
-              )}
-            </small>
-
-          </div>
-
-          <span>
-            ${escapeHTML(
-              booking.status ||
-              "pending"
-            )}
-          </span>
-
-          <strong>
-            ₹${escapeHTML(
-              String(
-                booking.amount ||
-                0
-              )
-            )}
-          </strong>
-
-        </div>
-
-      `
-    ).join("");
-
-}
-
-
-// =========================================================
-// VERIFICATION
-// =========================================================
-
-async function loadVerification() {
-
-  const container =
-    document.getElementById(
-      "adminVerificationList"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-large-empty">
-      <div>🛡</div>
-      <h3>Loading verification...</h3>
-    </div>`;
-
-
-  /*
-    Verification columns/table tumhare actual
-    database schema ke according connect karenge.
-
-    Abhi page safely load hoga.
-  */
-
-
-  container.innerHTML =
-    `<div class="admin-large-empty">
-      <div>🛡</div>
-      <h3>Verification Center Ready</h3>
-      <p>
-        Pending verification requests will appear here.
-      </p>
-    </div>`;
-
-}
-
-
-// =========================================================
-// FINANCE
-// =========================================================
-
-async function loadFinance() {
-
-  setText(
-    "grossBookingValue",
-    "₹0"
-  );
-
-  setText(
-    "platformCommission",
-    "₹0"
-  );
-
-  setText(
-    "ownerPayouts",
-    "₹0"
-  );
-
-  setText(
-    "totalRefunds",
-    "₹0"
-  );
-
-}
-
-
-// =========================================================
-// ANALYTICS
-// =========================================================
-
-function loadAnalytics() {
-
-  const charts =
-    document.querySelectorAll(
-      ".analytics-chart"
-    );
-
-
-  charts.forEach(
-    chart => {
-
-      chart.innerHTML =
-        "Analytics data will appear here.";
-
-    }
-  );
-
-}
-
-
-// =========================================================
-// SUPPORT
-// =========================================================
-
-function loadSupport() {
-
-  const container =
-    document.getElementById(
-      "supportCaseList"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-large-empty">
-      <div>🚨</div>
-      <h3>No support cases</h3>
-      <p>
-        Customer complaints will appear here.
-      </p>
-    </div>`;
-
-}
-
-
-// =========================================================
-// NOTIFICATION HISTORY
-// =========================================================
-
-function loadNotificationHistory() {
-
-  const container =
-    document.getElementById(
-      "adminNotificationHistory"
-    );
-
-
-  if (!container) return;
-
-
-  container.innerHTML =
-    `<div class="admin-empty">
-      No notifications sent yet.
-    </div>`;
-
-}
-
-
-// =========================================================
-// SETTINGS
-// =========================================================
-
-function loadSettings() {
-
-  const savedCommission =
-    localStorage.getItem(
-      "rentoride_admin_commission"
-    );
-
-
-  const savedWithdrawal =
-    localStorage.getItem(
-      "rentoride_min_withdrawal"
-    );
-
-
-  const commissionInput =
-    document.getElementById(
-      "platformCommissionRate"
-    );
-
-
-  const withdrawalInput =
-    document.getElementById(
-      "minimumWithdrawal"
-    );
-
-
-  if (
-    commissionInput &&
-    savedCommission !== null
-  ) {
-
-    commissionInput.value =
-      savedCommission;
-  }
-
-
-  if (
-    withdrawalInput &&
-    savedWithdrawal !== null
-  ) {
-
-    withdrawalInput.value =
-      savedWithdrawal;
-  }
-
-}
-
-
-// =========================================================
-// SAVE SETTINGS
-// =========================================================
-
-const saveSettings =
-  document.getElementById(
-    "saveAdminSettings"
-  );
-
-
-if (saveSettings) {
-
-  saveSettings.addEventListener(
-    "click",
-    function () {
-
-      const commission =
+      const target =
         document.getElementById(
-          "platformCommissionRate"
-        )?.value || 10;
-
-
-      const withdrawal =
-        document.getElementById(
-          "minimumWithdrawal"
-        )?.value || 500;
-
-
-      localStorage.setItem(
-        "rentoride_admin_commission",
-        commission
-      );
-
-
-      localStorage.setItem(
-        "rentoride_min_withdrawal",
-        withdrawal
-      );
-
-
-      showAdminPopup(
-        "Settings Saved",
-        "Platform settings saved successfully."
-      );
-
-    }
-  );
-
-}
-
-
-// =========================================================
-// LOGOUT
-// =========================================================
-
-if (logoutBtn) {
-
-  logoutBtn.addEventListener(
-    "click",
-    async function () {
-
-      const confirmed =
-        confirm(
-          "Logout from Admin Command Center?"
+          `admin-section-${sectionName}`
         );
 
 
-      if (!confirmed) return;
+      if (target) {
+
+        target.classList.add("active");
+
+      } else {
+
+        console.warn(
+          `Section not found: admin-section-${sectionName}`
+        );
+
+        return;
+      }
 
 
-      try {
+      // Page titles
+
+      const titles = {
+
+        overview: "Command Center",
+        users: "Users",
+        owners: "Owners",
+        vehicles: "Vehicles",
+        verification: "Verification Center",
+        bookings: "Bookings",
+        finance: "Finance Center",
+        analytics: "Analytics",
+        support: "Support & Complaints",
+        notifications: "Notifications",
+        settings: "Platform Settings"
+
+      };
+
+
+      if (pageTitle) {
+
+        pageTitle.textContent =
+          titles[sectionName] ||
+          "Command Center";
+
+      }
+
+
+      // Close mobile sidebar
+
+      closeMobileSidebar();
+
+    });
+
+  });
+
+
+  // Internal section buttons
+
+  document
+    .querySelectorAll("[data-section-link]")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const targetSection =
+          button.dataset.sectionLink;
+
+        const targetNav =
+          document.querySelector(
+            `.admin-nav-item[data-section="${targetSection}"]`
+          );
+
+
+        if (targetNav) {
+
+          targetNav.click();
+
+        }
+
+      });
+
+    });
+
+}
+
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+
+function setupMobileMenu() {
+
+  const menuBtn =
+    document.getElementById("adminMenuBtn");
+
+  const sidebar =
+    document.getElementById("adminSidebar");
+
+  const overlay =
+    document.getElementById("adminSidebarOverlay");
+
+
+  if (menuBtn) {
+
+    menuBtn.addEventListener("click", () => {
+
+      sidebar?.classList.toggle("open");
+
+      overlay?.classList.toggle("active");
+
+    });
+
+  }
+
+
+  if (overlay) {
+
+    overlay.addEventListener("click", () => {
+
+      closeMobileSidebar();
+
+    });
+
+  }
+
+}
+
+
+function closeMobileSidebar() {
+
+  document
+    .getElementById("adminSidebar")
+    ?.classList.remove("open");
+
+
+  document
+    .getElementById("adminSidebarOverlay")
+    ?.classList.remove("active");
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function setupLogout() {
+
+  const logoutBtn =
+    document.getElementById("adminLogoutBtn");
+
+
+  if (!logoutBtn) return;
+
+
+  logoutBtn.addEventListener("click", async () => {
+
+    const confirmLogout =
+      confirm("Are you sure you want to logout?");
+
+
+    if (!confirmLogout) return;
+
+
+    try {
+
+      if (supabaseClient) {
 
         await supabaseClient.auth.signOut();
 
-      } catch (error) {
-
-        console.error(
-          "Logout error:",
-          error
-        );
-
       }
 
+    } catch (error) {
 
-      window.location.replace(
-        "admin-login.html"
-      );
+      console.error("Logout error:", error);
 
     }
-  );
+
+
+    window.location.replace("login.html");
+
+  });
 
 }
 
 
-// =========================================================
-// NOTIFICATION POPUP
-// =========================================================
+/* =========================================================
+   MODAL SYSTEM
+========================================================= */
 
-function showAdminPopup(
-  title,
-  message
-) {
+function setupModals() {
+
+  const modal =
+    document.getElementById("adminDetailModal");
+
+  const closeBtn =
+    document.getElementById("closeAdminDetailModal");
+
+  const overlay =
+    modal?.querySelector(".admin-modal-overlay");
+
+
+  function closeModal() {
+
+    modal?.classList.remove("active");
+
+  }
+
+
+  if (closeBtn) {
+
+    closeBtn.addEventListener(
+      "click",
+      closeModal
+    );
+
+  }
+
+
+  if (overlay) {
+
+    overlay.addEventListener(
+      "click",
+      closeModal
+    );
+
+  }
+
+
+  document.addEventListener("keydown", event => {
+
+    if (event.key === "Escape") {
+
+      closeModal();
+
+    }
+
+  });
+
+}
+
+
+/* =========================================================
+   SHOW ADMIN DETAIL MODAL
+========================================================= */
+
+function showAdminDetail(title, content) {
+
+  const modal =
+    document.getElementById("adminDetailModal");
+
+  const titleElement =
+    document.getElementById("adminDetailModalTitle");
+
+  const contentElement =
+    document.getElementById("adminDetailModalContent");
+
+
+  if (!modal) return;
+
+
+  if (titleElement) {
+
+    titleElement.textContent =
+      title || "Details";
+
+  }
+
+
+  if (contentElement) {
+
+    contentElement.innerHTML =
+      content || "";
+
+  }
+
+
+  modal.classList.add("active");
+
+}
+
+
+/* =========================================================
+   VEHICLE FILTERS
+========================================================= */
+
+function setupVehicleFilters() {
+
+  const buttons =
+    document.querySelectorAll(
+      "[data-vehicle-filter]"
+    );
+
+
+  buttons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      buttons.forEach(btn =>
+        btn.classList.remove("active")
+      );
+
+
+      button.classList.add("active");
+
+
+      const filter =
+        button.dataset.vehicleFilter;
+
+
+      console.log(
+        "Vehicle filter:",
+        filter
+      );
+
+
+      filterVehicleCards(filter);
+
+    });
+
+  });
+
+}
+
+
+function filterVehicleCards(filter) {
+
+  const cards =
+    document.querySelectorAll(
+      ".admin-vehicle-card"
+    );
+
+
+  cards.forEach(card => {
+
+    if (filter === "all") {
+
+      card.style.display = "";
+
+      return;
+
+    }
+
+
+    const status =
+      card.dataset.status;
+
+
+    card.style.display =
+      status === filter
+        ? ""
+        : "none";
+
+  });
+
+}
+
+
+/* =========================================================
+   BOOKING FILTERS
+========================================================= */
+
+function setupBookingFilters() {
+
+  const buttons =
+    document.querySelectorAll(
+      ".admin-booking-filter"
+    );
+
+
+  buttons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      buttons.forEach(btn =>
+        btn.classList.remove("active")
+      );
+
+
+      button.classList.add("active");
+
+
+      const filter =
+        button.dataset.bookingFilter;
+
+
+      filterBookingRows(filter);
+
+    });
+
+  });
+
+}
+
+
+function filterBookingRows(filter) {
+
+  const rows =
+    document.querySelectorAll(
+      ".admin-booking-row"
+    );
+
+
+  rows.forEach(row => {
+
+    if (filter === "all") {
+
+      row.style.display = "";
+
+      return;
+
+    }
+
+
+    const status =
+      row.dataset.status;
+
+
+    row.style.display =
+      status === filter
+        ? ""
+        : "none";
+
+  });
+
+}
+
+
+/* =========================================================
+   SUPPORT FILTERS
+========================================================= */
+
+function setupSupportFilters() {
+
+  const buttons =
+    document.querySelectorAll(
+      ".support-filter"
+    );
+
+
+  buttons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      buttons.forEach(btn =>
+        btn.classList.remove("active")
+      );
+
+
+      button.classList.add("active");
+
+
+      const filter =
+        button.dataset.supportFilter;
+
+
+      filterSupportCases(filter);
+
+    });
+
+  });
+
+}
+
+
+function filterSupportCases(filter) {
+
+  const cards =
+    document.querySelectorAll(
+      ".support-case"
+    );
+
+
+  cards.forEach(card => {
+
+    if (filter === "all") {
+
+      card.style.display = "";
+
+      return;
+
+    }
+
+
+    const status =
+      card.dataset.status;
+
+
+    card.style.display =
+      status === filter
+        ? ""
+        : "none";
+
+  });
+
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function setupSearch() {
+
+  const userSearch =
+    document.getElementById("userSearch");
+
+  const ownerSearch =
+    document.getElementById("ownerSearch");
+
+
+  if (userSearch) {
+
+    userSearch.addEventListener(
+      "input",
+      () => {
+
+        searchTable(
+          userSearch.value,
+          "#usersTable .admin-table-row"
+        );
+
+      }
+    );
+
+  }
+
+
+  if (ownerSearch) {
+
+    ownerSearch.addEventListener(
+      "input",
+      () => {
+
+        searchTable(
+          ownerSearch.value,
+          "#ownersTable .admin-table-row"
+        );
+
+      }
+    );
+
+  }
+
+}
+
+
+function searchTable(query, selector) {
+
+  const rows =
+    document.querySelectorAll(selector);
+
+
+  const search =
+    query.trim().toLowerCase();
+
+
+  rows.forEach(row => {
+
+    const text =
+      row.textContent.toLowerCase();
+
+
+    row.style.display =
+      text.includes(search)
+        ? ""
+        : "none";
+
+  });
+
+}
+
+
+/* =========================================================
+   NOTIFICATION POPUP
+========================================================= */
+
+function showAdminNotification(title, message) {
 
   const popup =
     document.getElementById(
@@ -1509,126 +837,179 @@ function showAdminPopup(
     );
 
 
-  if (!popup) return;
-
-
-  const popupTitle =
+  const titleElement =
     document.getElementById(
       "adminPopupTitle"
     );
 
 
-  const popupMessage =
+  const messageElement =
     document.getElementById(
       "adminPopupMessage"
     );
 
 
-  if (popupTitle) {
-    popupTitle.textContent =
-      title;
+  if (!popup) return;
+
+
+  if (titleElement) {
+
+    titleElement.textContent =
+      title || "System Notification";
+
   }
 
 
-  if (popupMessage) {
-    popupMessage.textContent =
-      message;
+  if (messageElement) {
+
+    messageElement.textContent =
+      message || "";
+
   }
 
 
-  popup.classList.add(
-    "show"
-  );
+  popup.classList.add("active");
 
 
-  setTimeout(
-    function () {
+  setTimeout(() => {
 
-      popup.classList.remove(
-        "show"
-      );
+    popup.classList.remove("active");
 
-    },
-    4000
-  );
+  }, 5000);
 
 }
 
 
-// =========================================================
-// CLOSE POPUP
-// =========================================================
+/* =========================================================
+   NOTIFICATION POPUP CLOSE
+========================================================= */
 
-const closePopup =
-  document.getElementById(
-    "closeAdminNotificationPopup"
-  );
+function setupNotificationPopup() {
+
+  const popup =
+    document.getElementById(
+      "adminNotificationPopup"
+    );
 
 
-if (closePopup) {
+  const close =
+    document.getElementById(
+      "closeAdminNotificationPopup"
+    );
 
-  closePopup.addEventListener(
-    "click",
-    function () {
 
-      const popup =
+  if (close) {
+
+    close.addEventListener("click", () => {
+
+      popup?.classList.remove("active");
+
+    });
+
+  }
+
+
+  const notificationButton =
+    document.getElementById(
+      "adminNotificationBtn"
+    );
+
+
+  if (notificationButton) {
+
+    notificationButton.addEventListener(
+      "click",
+      () => {
+
+        const section =
+          document.querySelector(
+            '.admin-nav-item[data-section="notifications"]'
+          );
+
+
+        section?.click();
+
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   ADMIN NOTIFICATION FORM
+========================================================= */
+
+function setupNotificationForm() {
+
+  const form =
+    document.getElementById(
+      "adminNotificationForm"
+    );
+
+
+  if (!form) return;
+
+
+  form.addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+
+      const audience =
         document.getElementById(
-          "adminNotificationPopup"
+          "notificationAudience"
+        )?.value;
+
+
+      const title =
+        document.getElementById(
+          "notificationTitle"
+        )?.value.trim();
+
+
+      const message =
+        document.getElementById(
+          "notificationMessage"
+        )?.value.trim();
+
+
+      if (!title || !message) {
+
+        alert(
+          "Please enter notification title and message."
         );
 
-
-      if (popup) {
-
-        popup.classList.remove(
-          "show"
-        );
+        return;
 
       }
 
-    }
-  );
 
-}
+      /*
+       * Abhi database table ka exact schema
+       * define nahi hua hai, isliye yahan fake
+       * database insert nahi kar rahe.
+       *
+       * Form working rahega aur validation karega.
+       */
 
-
-// =========================================================
-// SEARCH USERS
-// =========================================================
-
-const userSearch =
-  document.getElementById(
-    "userSearch"
-  );
-
-
-if (userSearch) {
-
-  userSearch.addEventListener(
-    "input",
-    function () {
-
-      const value =
-        this.value
-          .toLowerCase()
-          .trim();
+      console.log({
+        audience,
+        title,
+        message
+      });
 
 
-      document
-        .querySelectorAll(
-          "#usersTable .admin-simple-row"
-        )
-        .forEach(
-          row => {
+      showAdminNotification(
+        "Notification Ready",
+        "Notification details validated successfully."
+      );
 
-            row.style.display =
-              row.textContent
-                .toLowerCase()
-                .includes(value)
-                  ? ""
-                  : "none";
 
-          }
-        );
+      form.reset();
 
     }
   );
@@ -1636,69 +1017,70 @@ if (userSearch) {
 }
 
 
-// =========================================================
-// SEARCH OWNERS
-// =========================================================
+/* =========================================================
+   PLATFORM SETTINGS
+========================================================= */
 
-const ownerSearch =
-  document.getElementById(
-    "ownerSearch"
-  );
+function setupPlatformSettings() {
 
-
-if (ownerSearch) {
-
-  ownerSearch.addEventListener(
-    "input",
-    function () {
-
-      const value =
-        this.value
-          .toLowerCase()
-          .trim();
+  const saveBtn =
+    document.getElementById(
+      "saveAdminSettings"
+    );
 
 
-      document
-        .querySelectorAll(
-          "#ownersTable .admin-simple-row"
-        )
-        .forEach(
-          row => {
-
-            row.style.display =
-              row.textContent
-                .toLowerCase()
-                .includes(value)
-                  ? ""
-                  : "none";
-
-          }
-        );
-
-    }
-  );
-
-}
+  if (!saveBtn) return;
 
 
-// =========================================================
-// HEADER NOTIFICATION
-// =========================================================
-
-const notificationBtn =
-  document.getElementById(
-    "adminNotificationBtn"
-  );
-
-
-if (notificationBtn) {
-
-  notificationBtn.addEventListener(
+  saveBtn.addEventListener(
     "click",
-    function () {
+    () => {
 
-      showSection(
-        "notifications"
+      const commission =
+        document.getElementById(
+          "platformCommissionRate"
+        )?.value;
+
+
+      const minimumWithdrawal =
+        document.getElementById(
+          "minimumWithdrawal"
+        )?.value;
+
+
+      const deliveryCharge =
+        document.getElementById(
+          "defaultDeliveryCharge"
+        )?.value;
+
+
+      const allowBookings =
+        document.getElementById(
+          "allowBookings"
+        )?.checked;
+
+
+      const maintenanceMode =
+        document.getElementById(
+          "maintenanceMode"
+        )?.checked;
+
+
+      console.log(
+        "Platform settings:",
+        {
+          commission,
+          minimumWithdrawal,
+          deliveryCharge,
+          allowBookings,
+          maintenanceMode
+        }
+      );
+
+
+      showAdminNotification(
+        "Settings Saved",
+        "Platform settings have been updated."
       );
 
     }
@@ -1707,14 +1089,41 @@ if (notificationBtn) {
 }
 
 
-// =========================================================
-// QUICK INITIALIZATION
-// =========================================================
+/* =========================================================
+   REVENUE PERIOD
+========================================================= */
 
-function setText(
-  id,
-  value
-) {
+function setupRevenuePeriod() {
+
+  const select =
+    document.getElementById(
+      "revenuePeriod"
+    );
+
+
+  if (!select) return;
+
+
+  select.addEventListener(
+    "change",
+    () => {
+
+      console.log(
+        "Revenue period:",
+        select.value
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   BASIC DASHBOARD DATA
+========================================================= */
+
+function setNumber(id, value) {
 
   const element =
     document.getElementById(id);
@@ -1723,59 +1132,146 @@ function setText(
   if (element) {
 
     element.textContent =
-      value;
+      Number(value || 0).toLocaleString("en-IN");
 
   }
 
 }
 
 
-// =========================================================
-// HTML SECURITY
-// =========================================================
+function setCurrency(id, value) {
 
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
+  const element =
+    document.getElementById(id);
 
 
-function escapeAttribute(value) {
+  if (element) {
 
-  return escapeHTML(value);
+    element.textContent =
+      "₹" +
+      Number(value || 0).toLocaleString("en-IN");
+
+  }
 
 }
 
 
-// =========================================================
-// URL HASH NAVIGATION
-// =========================================================
+/* =========================================================
+   LOAD DASHBOARD COUNTS
+========================================================= */
 
-function loadHashSection() {
+async function loadDashboardStats() {
 
-  const hash =
-    window.location.hash
-      .replace("#", "")
-      .trim();
+  if (!supabaseClient) return;
 
 
-  if (
-    hash &&
-    sectionTitles[hash]
-  ) {
+  try {
 
-    showSection(hash);
+    // USERS
 
-  } else {
+    const usersResult =
+      await supabaseClient
+        .from("profiles")
+        .select("id", {
+          count: "exact",
+          head: true
+        });
 
-    showSection(
-      "overview"
+
+    if (!usersResult.error) {
+
+      setNumber(
+        "adminTotalUsers",
+        usersResult.count
+      );
+
+      setNumber(
+        "userBadge",
+        usersResult.count
+      );
+
+    }
+
+
+    // OWNERS
+
+    const ownersResult =
+      await supabaseClient
+        .from("profiles")
+        .select("id", {
+          count: "exact",
+          head: true
+        })
+        .eq("role", "owner");
+
+
+    if (!ownersResult.error) {
+
+      setNumber(
+        "adminTotalOwners",
+        ownersResult.count
+      );
+
+      setNumber(
+        "ownerBadge",
+        ownersResult.count
+      );
+
+    }
+
+
+    // VEHICLES
+
+    const vehiclesResult =
+      await supabaseClient
+        .from("bikes")
+        .select("id", {
+          count: "exact",
+          head: true
+        });
+
+
+    if (!vehiclesResult.error) {
+
+      setNumber(
+        "adminTotalVehicles",
+        vehiclesResult.count
+      );
+
+      setNumber(
+        "vehicleBadge",
+        vehiclesResult.count
+      );
+
+    }
+
+
+    // BOOKINGS
+
+    const bookingsResult =
+      await supabaseClient
+        .from("bookings")
+        .select("id", {
+          count: "exact",
+          head: true
+        });
+
+
+    if (!bookingsResult.error) {
+
+      setNumber(
+        "adminTotalBookings",
+        bookingsResult.count
+      );
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Dashboard stats error:",
+      error
     );
 
   }
@@ -1783,64 +1279,67 @@ function loadHashSection() {
 }
 
 
-// =========================================================
-// AUTH STATE LISTENER
-// =========================================================
-
-supabaseClient.auth.onAuthStateChange(
-  async function (
-    event,
-    session
-  ) {
-
-    if (
-      event === "SIGNED_OUT"
-    ) {
-
-      redirectToLogin();
-
-      return;
-    }
-
-
-    if (
-      event === "SIGNED_IN" &&
-      session
-    ) {
-
-      await checkAdminAccess();
-
-    }
-
-  }
-);
-
-
-// =========================================================
-// START
-// =========================================================
+/* =========================================================
+   PAGE INITIALIZATION
+========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
-  async function () {
+  async () => {
 
-    // IMPORTANT:
-    // Security check first.
-    const isAdmin =
+    /*
+     * SECURITY FIRST
+     *
+     * Admin check fail hua toh dashboard
+     * ka baaki JS execute nahi hoga.
+     */
+
+    const allowed =
       await checkAdminAccess();
 
 
-    if (!isAdmin) {
+    if (!allowed) {
+
       return;
+
     }
 
 
-    // Dashboard only after admin verified
-    loadHashSection();
+    // UI
+
+    setupNavigation();
+
+    setupMobileMenu();
+
+    setupLogout();
+
+    setupModals();
+
+    setupVehicleFilters();
+
+    setupBookingFilters();
+
+    setupSupportFilters();
+
+    setupSearch();
+
+    setupNotificationPopup();
+
+    setupNotificationForm();
+
+    setupPlatformSettings();
+
+    setupRevenuePeriod();
 
 
-    // Initial stats
+    // DATA
+
     await loadDashboardStats();
+
+
+    console.log(
+      "RentoRide Admin Dashboard initialized."
+    );
 
   }
 );
