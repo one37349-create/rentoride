@@ -1772,3 +1772,29 @@ a {
     font-size: 27px;
   }
 }
+/* ================================
+   ADMIN SECTION NAVIGATION FIX
+================================ */
+
+.admin-section {
+    display: none !important;
+}
+
+.admin-section.active {
+    display: block !important;
+}
+
+
+/* Active sidebar button */
+
+.admin-nav-item.active {
+    display: flex;
+}
+
+
+/* Prevent buttons from behaving like links */
+
+.admin-nav-item {
+    cursor: pointer;
+    pointer-events: auto;
+}
