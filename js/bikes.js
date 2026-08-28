@@ -20,16 +20,6 @@ if (menuToggle && navMenu) {
 }
 
 
-/* ================= FILTER TOGGLE ================= */
-
-const filterBox = document.querySelector(".filter-box");
-
-if (filterBox) {
-
-  /* Create Filter Button */
-
-  const filterButton = document.createElement("button");
-
   filterButton.className = "filter-toggle";
 
   filterButton.innerHTML = `
