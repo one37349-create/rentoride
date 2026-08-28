@@ -1,5 +1,6 @@
 /* =========================================================
-   RENTORIDE ADMIN DASHBOARD JS
+   RentoRide Admin Dashboard
+   File: js/admin.js
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,11 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const navItems = document.querySelectorAll(".admin-nav-item");
   const sections = document.querySelectorAll(".admin-section");
 
-  const pageTitle = document.getElementById("pageTitle");
+  const pageTitle = document.getElementById("adminPageTitle");
 
   const menuBtn = document.getElementById("adminMenuBtn");
   const sidebar = document.getElementById("adminSidebar");
-  const sidebarOverlay = document.getElementById("adminSidebarOverlay");
+  const overlay = document.getElementById("adminSidebarOverlay");
 
   const logoutBtn = document.getElementById("adminLogoutBtn");
 
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notificationPopup =
     document.getElementById("adminNotificationPopup");
 
-  const closeNotification =
+  const closeNotificationPopup =
     document.getElementById("closeAdminNotificationPopup");
 
 
@@ -34,24 +35,25 @@ document.addEventListener("DOMContentLoaded", () => {
   ======================================================= */
 
   const sectionTitles = {
-    overview: "Dashboard",
+    overview: "Command Center",
     users: "Users",
+    owners: "Owners",
     vehicles: "Vehicles",
+    verification: "Verification Center",
     bookings: "Bookings",
-    verification: "Verification",
-    earnings: "Finance & Earnings",
+    finance: "Finance Center",
     analytics: "Analytics",
+    support: "Support & Complaints",
     notifications: "Notifications",
-    support: "Support",
-    settings: "System Settings"
+    settings: "Platform Settings"
   };
 
 
   /* =======================================================
-     SHOW SECTION
+     NAVIGATION
   ======================================================= */
 
-  function showSection(sectionName) {
+  function openSection(sectionName) {
 
     sections.forEach(section => {
       section.classList.remove("active");
@@ -62,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const targetSection =
-      document.getElementById(`section-${sectionName}`);
+      document.getElementById(`admin-section-${sectionName}`);
 
     const targetNav =
       document.querySelector(
@@ -79,17 +81,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (pageTitle) {
       pageTitle.textContent =
-        sectionTitles[sectionName] || "Admin Dashboard";
+        sectionTitles[sectionName] || "Command Center";
     }
 
-    /* Close mobile sidebar */
+    /* Close mobile menu */
 
     if (sidebar) {
       sidebar.classList.remove("open");
     }
 
-    if (sidebarOverlay) {
-      sidebarOverlay.classList.remove("active");
+    if (overlay) {
+      overlay.classList.remove("active");
     }
 
     window.scrollTo({
@@ -99,20 +101,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =======================================================
-     SIDEBAR NAVIGATION
-  ======================================================= */
-
   navItems.forEach(item => {
 
     item.addEventListener("click", () => {
 
-      const sectionName =
-        item.dataset.section;
+      const section =
+        item.getAttribute("data-section");
 
-      if (!sectionName) return;
-
-      showSection(sectionName);
+      if (section) {
+        openSection(section);
+      }
 
     });
 
@@ -120,19 +118,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =======================================================
-     DATA-SECTION LINKS
+     INTERNAL SECTION LINKS
   ======================================================= */
 
-  document.querySelectorAll("[data-section-link]")
+  document
+    .querySelectorAll("[data-section-link]")
     .forEach(button => {
 
       button.addEventListener("click", () => {
 
-        const sectionName =
-          button.dataset.sectionLink;
+        const section =
+          button.getAttribute("data-section-link");
 
-        if (sectionName) {
-          showSection(sectionName);
+        if (section) {
+          openSection(section);
         }
 
       });
@@ -141,94 +140,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =======================================================
-     MOBILE MENU
+     MOBILE SIDEBAR
   ======================================================= */
 
-  if (menuBtn && sidebar) {
+  if (menuBtn) {
 
     menuBtn.addEventListener("click", () => {
 
-      sidebar.classList.toggle("open");
-
-      if (sidebarOverlay) {
-        sidebarOverlay.classList.toggle("active");
-      }
+      sidebar?.classList.add("open");
+      overlay?.classList.add("active");
 
     });
 
   }
 
 
-  if (sidebarOverlay) {
+  if (overlay) {
 
-    sidebarOverlay.addEventListener("click", () => {
+    overlay.addEventListener("click", () => {
 
-      sidebar.classList.remove("open");
-      sidebarOverlay.classList.remove("active");
-
-    });
-
-  }
-
-
-  /* =======================================================
-     LOGOUT
-  ======================================================= */
-
-  if (logoutBtn) {
-
-    logoutBtn.addEventListener("click", async () => {
-
-      const confirmLogout =
-        confirm("Are you sure you want to logout?");
-
-      if (!confirmLogout) return;
-
-      try {
-
-        /*
-          Supabase logout.
-          Agar supabaseClient available hai
-          toh signOut chalega.
-        */
-
-        if (
-          typeof supabaseClient !== "undefined" &&
-          supabaseClient?.auth
-        ) {
-
-          await supabaseClient.auth.signOut();
-
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Logout error:",
-          error
-        );
-
-      }
-
-      window.location.href = "login.html";
-
-    });
-
-  }
-
-
-  /* =======================================================
-     NOTIFICATION BUTTON
-  ======================================================= */
-
-  if (notificationBtn) {
-
-    notificationBtn.addEventListener("click", () => {
-
-      showAdminNotification(
-        "Admin Notifications",
-        "No new system notifications."
-      );
+      sidebar?.classList.remove("open");
+      overlay.classList.remove("active");
 
     });
 
@@ -239,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
      NOTIFICATION POPUP
   ======================================================= */
 
-  function showAdminNotification(title, message) {
+  function showNotification(title, message) {
 
     if (!notificationPopup) return;
 
@@ -260,19 +192,93 @@ document.addEventListener("DOMContentLoaded", () => {
     notificationPopup.classList.add("show");
 
     setTimeout(() => {
-
       notificationPopup.classList.remove("show");
+    }, 5000);
+  }
 
-    }, 4500);
+
+  if (notificationBtn) {
+
+    notificationBtn.addEventListener("click", () => {
+
+      openSection("notifications");
+
+    });
 
   }
 
 
-  if (closeNotification) {
+  if (closeNotificationPopup) {
 
-    closeNotification.addEventListener("click", () => {
+    closeNotificationPopup.addEventListener(
+      "click",
+      () => {
+        notificationPopup?.classList.remove("show");
+      }
+    );
 
-      notificationPopup.classList.remove("show");
+  }
+
+
+  /* =======================================================
+     ADMIN NAME
+  ======================================================= */
+
+  const savedAdminName =
+    localStorage.getItem("rentoride_admin_name");
+
+  if (savedAdminName) {
+
+    const nameElements = [
+      document.getElementById("adminName"),
+      document.getElementById("adminHeaderName"),
+      document.getElementById("welcomeAdminName")
+    ];
+
+    nameElements.forEach(element => {
+
+      if (element) {
+        element.textContent = savedAdminName;
+      }
+
+    });
+
+    const firstLetter =
+      savedAdminName.charAt(0).toUpperCase();
+
+    const avatarElements = [
+      document.getElementById("adminAvatar"),
+      document.getElementById("adminHeaderAvatar")
+    ];
+
+    avatarElements.forEach(element => {
+
+      if (element) {
+        element.textContent = firstLetter;
+      }
+
+    });
+
+  }
+
+
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
+
+  if (logoutBtn) {
+
+    logoutBtn.addEventListener("click", () => {
+
+      const confirmLogout =
+        confirm("Are you sure you want to logout?");
+
+      if (!confirmLogout) return;
+
+      localStorage.removeItem("rentoride_admin_name");
+      localStorage.removeItem("rentoride_admin_logged_in");
+
+      window.location.href = "login.html";
 
     });
 
@@ -284,7 +290,9 @@ document.addEventListener("DOMContentLoaded", () => {
   ======================================================= */
 
   const vehicleFilters =
-    document.querySelectorAll(".admin-filter");
+    document.querySelectorAll(
+      ".admin-filter[data-vehicle-filter]"
+    );
 
   vehicleFilters.forEach(filter => {
 
@@ -296,41 +304,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
       filter.classList.add("active");
 
-      const filterValue =
-        filter.dataset.filter;
+      const status =
+        filter.getAttribute("data-vehicle-filter");
 
-      filterVehicleCards(filterValue);
+      filterVehicles(status);
 
     });
 
   });
 
 
-  function filterVehicleCards(filterValue) {
+  function filterVehicles(status) {
 
-    const cards =
+    const vehicles =
       document.querySelectorAll(
         ".admin-vehicle-card"
       );
 
-    if (!cards.length) return;
+    if (!vehicles.length) return;
 
-    cards.forEach(card => {
+    vehicles.forEach(vehicle => {
 
-      const cardStatus =
-        card.dataset.status;
+      const vehicleStatus =
+        vehicle.dataset.status;
 
-      if (
-        filterValue === "all" ||
-        !filterValue ||
-        cardStatus === filterValue
-      ) {
+      if (status === "all") {
 
-        card.style.display = "";
+        vehicle.style.display = "";
+
+      } else if (vehicleStatus === status) {
+
+        vehicle.style.display = "";
 
       } else {
 
-        card.style.display = "none";
+        vehicle.style.display = "none";
 
       }
 
@@ -358,35 +366,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
       filter.classList.add("active");
 
-      const filterValue =
-        filter.dataset.bookingFilter;
+      const status =
+        filter.getAttribute("data-booking-filter");
 
-      filterBookings(filterValue);
+      filterBookings(status);
 
     });
 
   });
 
 
-  function filterBookings(filterValue) {
+  function filterBookings(status) {
 
     const bookings =
       document.querySelectorAll(
-        ".admin-booking-card"
+        ".admin-booking-row"
       );
 
     if (!bookings.length) return;
 
     bookings.forEach(booking => {
 
-      const status =
+      const bookingStatus =
         booking.dataset.status;
 
-      if (
-        filterValue === "all" ||
-        !filterValue ||
-        status === filterValue
-      ) {
+      if (status === "all") {
+
+        booking.style.display = "";
+
+      } else if (bookingStatus === status) {
 
         booking.style.display = "";
 
@@ -399,59 +407,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   }
-
-
-  /* =======================================================
-     VERIFICATION FILTER
-  ======================================================= */
-
-  const verificationFilters =
-    document.querySelectorAll(
-      ".verification-filter"
-    );
-
-  verificationFilters.forEach(filter => {
-
-    filter.addEventListener("click", () => {
-
-      verificationFilters.forEach(btn => {
-        btn.classList.remove("active");
-      });
-
-      filter.classList.add("active");
-
-      const value =
-        filter.dataset.verificationFilter;
-
-      const items =
-        document.querySelectorAll(
-          ".verification-admin-card"
-        );
-
-      items.forEach(item => {
-
-        const status =
-          item.dataset.status;
-
-        if (
-          value === "all" ||
-          !value ||
-          status === value
-        ) {
-
-          item.style.display = "";
-
-        } else {
-
-          item.style.display = "none";
-
-        }
-
-      });
-
-    });
-
-  });
 
 
   /* =======================================================
@@ -473,359 +428,228 @@ document.addEventListener("DOMContentLoaded", () => {
 
       filter.classList.add("active");
 
-      const value =
-        filter.dataset.supportFilter;
+      const status =
+        filter.getAttribute("data-support-filter");
 
-      const tickets =
-        document.querySelectorAll(
-          ".support-ticket"
-        );
-
-      tickets.forEach(ticket => {
-
-        const status =
-          ticket.dataset.status;
-
-        if (
-          value === "all" ||
-          !value ||
-          status === value
-        ) {
-
-          ticket.style.display = "";
-
-        } else {
-
-          ticket.style.display = "none";
-
-        }
-
-      });
+      filterSupportCases(status);
 
     });
 
   });
 
 
+  function filterSupportCases(status) {
+
+    const cases =
+      document.querySelectorAll(
+        ".support-case"
+      );
+
+    if (!cases.length) return;
+
+    cases.forEach(item => {
+
+      const caseStatus =
+        item.dataset.status;
+
+      if (status === "all") {
+
+        item.style.display = "";
+
+      } else if (caseStatus === status) {
+
+        item.style.display = "";
+
+      } else {
+
+        item.style.display = "none";
+
+      }
+
+    });
+
+  }
+
+
   /* =======================================================
-     GLOBAL ADMIN SEARCH
+     USER SEARCH
   ======================================================= */
 
-  const searchInputs =
-    document.querySelectorAll(
-      ".admin-search"
-    );
+  const userSearch =
+    document.getElementById("userSearch");
 
-  searchInputs.forEach(input => {
+  if (userSearch) {
 
-    input.addEventListener("input", () => {
+    userSearch.addEventListener("input", () => {
 
       const search =
-        input.value.toLowerCase().trim();
+        userSearch.value
+          .toLowerCase()
+          .trim();
 
-      const container =
-        input.closest(".admin-panel, .admin-section");
+      document
+        .querySelectorAll(
+          "#usersTable tbody tr"
+        )
+        .forEach(row => {
 
-      if (!container) return;
+          const text =
+            row.textContent.toLowerCase();
 
-      const searchableItems =
-        container.querySelectorAll(
-          ".admin-search-item, " +
-          ".admin-user-card, " +
-          ".admin-vehicle-card, " +
-          ".admin-booking-card, " +
-          ".support-ticket"
-        );
+          row.style.display =
+            text.includes(search)
+              ? ""
+              : "none";
 
-      searchableItems.forEach(item => {
-
-        const text =
-          item.textContent.toLowerCase();
-
-        item.style.display =
-          text.includes(search)
-            ? ""
-            : "none";
-
-      });
+        });
 
     });
 
-  });
+  }
 
 
   /* =======================================================
-     MODAL SYSTEM
+     OWNER SEARCH
   ======================================================= */
 
-  function openModal(modalId) {
+  const ownerSearch =
+    document.getElementById("ownerSearch");
 
-    const modal =
-      document.getElementById(modalId);
+  if (ownerSearch) {
 
-    if (!modal) return;
+    ownerSearch.addEventListener("input", () => {
 
-    modal.classList.add("active");
+      const search =
+        ownerSearch.value
+          .toLowerCase()
+          .trim();
 
-    document.body.style.overflow = "hidden";
+      document
+        .querySelectorAll(
+          "#ownersTable tbody tr"
+        )
+        .forEach(row => {
+
+          const text =
+            row.textContent.toLowerCase();
+
+          row.style.display =
+            text.includes(search)
+              ? ""
+              : "none";
+
+        });
+
+    });
 
   }
-
-
-  function closeModal(modalId) {
-
-    const modal =
-      document.getElementById(modalId);
-
-    if (!modal) return;
-
-    modal.classList.remove("active");
-
-    document.body.style.overflow = "";
-
-  }
-
-
-  /* OPEN MODAL BUTTONS */
-
-  document.querySelectorAll("[data-open-modal]")
-    .forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        const modalId =
-          button.dataset.openModal;
-
-        openModal(modalId);
-
-      });
-
-    });
-
-
-  /* CLOSE MODAL BUTTONS */
-
-  document.querySelectorAll("[data-close-modal]")
-    .forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        const modalId =
-          button.dataset.closeModal;
-
-        closeModal(modalId);
-
-      });
-
-    });
-
-
-  /* CLICK OUTSIDE */
-
-  document.querySelectorAll(".admin-modal")
-    .forEach(modal => {
-
-      const overlay =
-        modal.querySelector(
-          ".admin-modal-overlay"
-        );
-
-      if (!overlay) return;
-
-      overlay.addEventListener("click", () => {
-
-        modal.classList.remove("active");
-
-        document.body.style.overflow = "";
-
-      });
-
-    });
-
-
-  /* ESCAPE KEY */
-
-  document.addEventListener("keydown", event => {
-
-    if (event.key !== "Escape") return;
-
-    document.querySelectorAll(
-      ".admin-modal.active"
-    ).forEach(modal => {
-
-      modal.classList.remove("active");
-
-    });
-
-    document.body.style.overflow = "";
-
-  });
 
 
   /* =======================================================
-     ADMIN ACTION BUTTONS
+     DETAIL MODAL
+  ======================================================= */
+
+  const detailModal =
+    document.getElementById("adminDetailModal");
+
+  const detailModalTitle =
+    document.getElementById(
+      "adminDetailModalTitle"
+    );
+
+  const detailModalContent =
+    document.getElementById(
+      "adminDetailModalContent"
+    );
+
+  const closeDetailModal =
+    document.getElementById(
+      "closeAdminDetailModal"
+    );
+
+
+  function openDetailModal(title, content) {
+
+    if (!detailModal) return;
+
+    if (detailModalTitle) {
+      detailModalTitle.textContent = title;
+    }
+
+    if (detailModalContent) {
+      detailModalContent.innerHTML = content;
+    }
+
+    detailModal.classList.add("show");
+
+  }
+
+
+  function closeModal() {
+
+    detailModal?.classList.remove("show");
+
+  }
+
+
+  if (closeDetailModal) {
+
+    closeDetailModal.addEventListener(
+      "click",
+      closeModal
+    );
+
+  }
+
+
+  if (detailModal) {
+
+    const modalOverlay =
+      detailModal.querySelector(
+        ".admin-modal-overlay"
+      );
+
+    modalOverlay?.addEventListener(
+      "click",
+      closeModal
+    );
+
+  }
+
+
+  /* =======================================================
+     QUICK DETAIL BUTTONS
   ======================================================= */
 
   document.addEventListener("click", event => {
 
     const button =
       event.target.closest(
-        "[data-admin-action]"
+        "[data-admin-detail]"
       );
 
     if (!button) return;
 
-    const action =
-      button.dataset.adminAction;
+    const type =
+      button.dataset.adminDetail;
 
-    switch (action) {
+    const title =
+      button.dataset.title || "Details";
 
-      case "approve":
+    const content =
+      button.dataset.content ||
+      "<p>No additional information available.</p>";
 
-        handleAdminAction(
-          button,
-          "Approved successfully."
-        );
-
-        break;
-
-
-      case "reject":
-
-        handleAdminAction(
-          button,
-          "Rejected successfully."
-        );
-
-        break;
-
-
-      case "suspend":
-
-        handleAdminAction(
-          button,
-          "Account suspended."
-        );
-
-        break;
-
-
-      case "activate":
-
-        handleAdminAction(
-          button,
-          "Account activated."
-        );
-
-        break;
-
-
-      case "delete":
-
-        if (
-          confirm(
-            "Are you sure you want to delete this item?"
-          )
-        ) {
-
-          handleAdminAction(
-            button,
-            "Item deleted."
-          );
-
-        }
-
-        break;
-
-
-      default:
-
-        console.log(
-          "Admin action:",
-          action
-        );
-
-    }
-
-  });
-
-
-  function handleAdminAction(button, message) {
-
-    const card =
-      button.closest(
-        ".admin-search-item, " +
-        ".admin-user-card, " +
-        ".admin-vehicle-card, " +
-        ".admin-booking-card, " +
-        ".verification-admin-card, " +
-        ".support-ticket"
-      );
-
-    if (card) {
-
-      card.classList.add("admin-action-complete");
-
-    }
-
-    showAdminNotification(
-      "RentoRide Admin",
-      message
+    openDetailModal(
+      title,
+      content
     );
-
-  }
-
-
-  /* =======================================================
-     SETTINGS TOGGLES
-  ======================================================= */
-
-  const settingInputs =
-    document.querySelectorAll(
-      ".admin-setting-toggle input, " +
-      ".admin-settings-grid input[type='checkbox']"
-    );
-
-  settingInputs.forEach(input => {
-
-    input.addEventListener("change", () => {
-
-      console.log(
-        "Setting changed:",
-        input.id,
-        input.checked
-      );
-
-    });
 
   });
 
 
   /* =======================================================
-     SAVE SETTINGS
-  ======================================================= */
-
-  const saveSettingsBtn =
-    document.getElementById(
-      "saveAdminSettingsBtn"
-    );
-
-  if (saveSettingsBtn) {
-
-    saveSettingsBtn.addEventListener("click", () => {
-
-      showAdminNotification(
-        "Settings Saved",
-        "Your admin settings have been updated."
-      );
-
-    });
-
-  }
-
-
-  /* =======================================================
-     SEND NOTIFICATION
+     NOTIFICATION BROADCAST
   ======================================================= */
 
   const notificationForm =
@@ -841,19 +665,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         event.preventDefault();
 
+        const audience =
+          document.getElementById(
+            "notificationAudience"
+          )?.value;
+
         const title =
           document.getElementById(
-            "adminNotificationTitle"
+            "notificationTitle"
           )?.value.trim();
 
         const message =
           document.getElementById(
-            "adminNotificationMessage"
+            "notificationMessage"
           )?.value.trim();
 
         if (!title || !message) {
 
-          alert(
+          showNotification(
+            "Missing Information",
             "Please enter notification title and message."
           );
 
@@ -861,12 +691,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        showAdminNotification(
-          "Notification Sent",
-          "Your notification has been prepared successfully."
+
+        const notification = {
+
+          audience,
+          title,
+          message,
+
+          time:
+            new Date().toLocaleString()
+
+        };
+
+
+        const oldNotifications =
+          JSON.parse(
+            localStorage.getItem(
+              "rentoride_admin_notifications"
+            ) || "[]"
+          );
+
+
+        oldNotifications.unshift(
+          notification
         );
 
+
+        localStorage.setItem(
+          "rentoride_admin_notifications",
+          JSON.stringify(
+            oldNotifications.slice(0, 20)
+          )
+        );
+
+
         notificationForm.reset();
+
+        showNotification(
+          "Notification Sent",
+          `Notification sent successfully to ${audience}.`
+        );
+
+        renderNotificationHistory();
 
       }
     );
@@ -875,146 +741,457 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =======================================================
-     REFRESH DASHBOARD
+     NOTIFICATION HISTORY
   ======================================================= */
 
-  const refreshBtn =
+  function renderNotificationHistory() {
+
+    const container =
+      document.getElementById(
+        "adminNotificationHistory"
+      );
+
+    if (!container) return;
+
+    const notifications =
+      JSON.parse(
+        localStorage.getItem(
+          "rentoride_admin_notifications"
+        ) || "[]"
+      );
+
+
+    if (!notifications.length) {
+
+      container.innerHTML = `
+        <div class="admin-empty">
+          No notifications sent yet.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      notifications.map(notification => `
+
+        <div class="admin-notification-item">
+
+          <div>
+            <strong>
+              ${escapeHTML(notification.title)}
+            </strong>
+
+            <p>
+              ${escapeHTML(notification.message)}
+            </p>
+
+            <small>
+              To: ${escapeHTML(notification.audience)}
+              • ${escapeHTML(notification.time)}
+            </small>
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }
+
+
+  /* =======================================================
+     PLATFORM SETTINGS
+  ======================================================= */
+
+  const saveSettings =
     document.getElementById(
-      "refreshAdminDashboard"
+      "saveAdminSettings"
     );
 
-  if (refreshBtn) {
 
-    refreshBtn.addEventListener("click", () => {
+  if (saveSettings) {
 
-      refreshBtn.disabled = true;
+    saveSettings.addEventListener(
+      "click",
+      () => {
 
-      const originalText =
-        refreshBtn.textContent;
+        const commission =
+          document.getElementById(
+            "platformCommissionRate"
+          )?.value;
 
-      refreshBtn.textContent =
-        "Refreshing...";
+        const minimumWithdrawal =
+          document.getElementById(
+            "minimumWithdrawal"
+          )?.value;
 
-      setTimeout(() => {
+        const deliveryCharge =
+          document.getElementById(
+            "defaultDeliveryCharge"
+          )?.value;
 
-        refreshBtn.disabled = false;
+        const allowBookings =
+          document.getElementById(
+            "allowBookings"
+          )?.checked;
 
-        refreshBtn.textContent =
-          originalText;
+        const maintenanceMode =
+          document.getElementById(
+            "maintenanceMode"
+          )?.checked;
 
-        showAdminNotification(
-          "Dashboard Updated",
-          "Latest dashboard information loaded."
+
+        const settings = {
+
+          commission,
+          minimumWithdrawal,
+          deliveryCharge,
+          allowBookings,
+          maintenanceMode
+
+        };
+
+
+        localStorage.setItem(
+          "rentoride_admin_settings",
+          JSON.stringify(settings)
         );
 
-      }, 700);
 
-    });
+        showNotification(
+          "Settings Saved",
+          "RentoRide platform settings have been updated."
+        );
 
-  }
-
-
-  /* =======================================================
-     DATE / TIME
-  ======================================================= */
-
-  function updateAdminTime() {
-
-    const timeElement =
-      document.getElementById(
-        "adminCurrentTime"
-      );
-
-    if (!timeElement) return;
-
-    const now = new Date();
-
-    timeElement.textContent =
-      now.toLocaleString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit"
-        }
-      );
-
-  }
-
-  updateAdminTime();
-
-  setInterval(
-    updateAdminTime,
-    60000
-  );
-
-
-  /* =======================================================
-     ACTIVE NAV ON PAGE LOAD
-  ======================================================= */
-
-  const activeNav =
-    document.querySelector(
-      ".admin-nav-item.active"
+      }
     );
 
-  if (activeNav) {
+  }
 
-    const sectionName =
-      activeNav.dataset.section;
+
+  /* =======================================================
+     LOAD SETTINGS
+  ======================================================= */
+
+  function loadSettings() {
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(
+          "rentoride_admin_settings"
+        ) || "null"
+      );
+
+    if (!saved) return;
+
+
+    const commission =
+      document.getElementById(
+        "platformCommissionRate"
+      );
+
+    const minimumWithdrawal =
+      document.getElementById(
+        "minimumWithdrawal"
+      );
+
+    const deliveryCharge =
+      document.getElementById(
+        "defaultDeliveryCharge"
+      );
+
+    const allowBookings =
+      document.getElementById(
+        "allowBookings"
+      );
+
+    const maintenanceMode =
+      document.getElementById(
+        "maintenanceMode"
+      );
+
+
+    if (commission && saved.commission !== undefined) {
+      commission.value =
+        saved.commission;
+    }
 
     if (
-      pageTitle &&
-      sectionName
+      minimumWithdrawal &&
+      saved.minimumWithdrawal !== undefined
     ) {
+      minimumWithdrawal.value =
+        saved.minimumWithdrawal;
+    }
 
-      pageTitle.textContent =
-        sectionTitles[sectionName] ||
-        "Admin Dashboard";
+    if (
+      deliveryCharge &&
+      saved.deliveryCharge !== undefined
+    ) {
+      deliveryCharge.value =
+        saved.deliveryCharge;
+    }
 
+    if (
+      allowBookings &&
+      saved.allowBookings !== undefined
+    ) {
+      allowBookings.checked =
+        saved.allowBookings;
+    }
+
+    if (
+      maintenanceMode &&
+      saved.maintenanceMode !== undefined
+    ) {
+      maintenanceMode.checked =
+        saved.maintenanceMode;
     }
 
   }
 
 
   /* =======================================================
-     PREVENT DOUBLE SUBMIT
+     REVENUE PERIOD
   ======================================================= */
 
-  document.querySelectorAll("form")
-    .forEach(form => {
+  const revenuePeriod =
+    document.getElementById(
+      "revenuePeriod"
+    );
 
-      form.addEventListener(
-        "submit",
-        () => {
+  if (revenuePeriod) {
 
-          const submitButton =
-            form.querySelector(
-              "button[type='submit']"
-            );
+    revenuePeriod.addEventListener(
+      "change",
+      () => {
 
-          if (!submitButton) return;
+        console.log(
+          "Revenue period:",
+          revenuePeriod.value
+        );
 
-          setTimeout(() => {
+        /*
+          Later Supabase se actual revenue
+          chart yaha load karenge.
+        */
 
-            submitButton.disabled = false;
+      }
+    );
 
-          }, 1500);
-
-        }
-      );
-
-    });
+  }
 
 
   /* =======================================================
-     INITIAL LOG
+     ADMIN ACTIVITY LOG
+  ======================================================= */
+
+  const activityLogBtn =
+    document.getElementById(
+      "adminActivityLogBtn"
+    );
+
+  if (activityLogBtn) {
+
+    activityLogBtn.addEventListener(
+      "click",
+      () => {
+
+        openDetailModal(
+          "Admin Activity Log",
+          `
+            <div class="admin-log-content">
+
+              <p>
+                <strong>System:</strong>
+                Admin dashboard opened.
+              </p>
+
+              <p>
+                <strong>Status:</strong>
+                System operational.
+              </p>
+
+              <p>
+                <strong>Time:</strong>
+                ${new Date().toLocaleString()}
+              </p>
+
+            </div>
+          `
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     SECURITY SETTINGS
+  ======================================================= */
+
+  const securityBtn =
+    document.getElementById(
+      "adminSecurityBtn"
+    );
+
+  if (securityBtn) {
+
+    securityBtn.addEventListener(
+      "click",
+      () => {
+
+        openDetailModal(
+          "Admin Security",
+          `
+            <div>
+
+              <p>
+                Admin security controls will be connected
+                with Supabase authentication.
+              </p>
+
+              <br>
+
+              <p>
+                <strong>Recommended:</strong>
+                Enable secure authentication,
+                session protection and admin role verification.
+              </p>
+
+            </div>
+          `
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     DASHBOARD DEMO COUNTERS
+  ======================================================= */
+
+  function loadDemoStats() {
+
+    const stats = {
+
+      users: 0,
+      owners: 0,
+      vehicles: 0,
+      bookings: 0,
+      activeRentals: 0,
+      revenue: 0,
+      pendingVehicles: 0,
+      pendingVerification: 0,
+      pendingWithdrawals: 0,
+      supportCases: 0
+
+    };
+
+
+    setText(
+      "adminTotalUsers",
+      stats.users
+    );
+
+    setText(
+      "adminTotalOwners",
+      stats.owners
+    );
+
+    setText(
+      "adminTotalVehicles",
+      stats.vehicles
+    );
+
+    setText(
+      "adminTotalBookings",
+      stats.bookings
+    );
+
+    setText(
+      "adminActiveRentals",
+      stats.activeRentals
+    );
+
+    setText(
+      "adminPlatformRevenue",
+      `₹${stats.revenue}`
+    );
+
+    setText(
+      "pendingVehicleApprovals",
+      stats.pendingVehicles
+    );
+
+    setText(
+      "pendingVerifications",
+      stats.pendingVerification
+    );
+
+    setText(
+      "pendingWithdrawals",
+      `₹${stats.pendingWithdrawals}`
+    );
+
+    setText(
+      "openSupportCases",
+      stats.supportCases
+    );
+
+  }
+
+
+  /* =======================================================
+     HELPERS
+  ======================================================= */
+
+  function setText(id, value) {
+
+    const element =
+      document.getElementById(id);
+
+    if (element) {
+      element.textContent = value;
+    }
+
+  }
+
+
+  function escapeHTML(value) {
+
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  }
+
+
+  /* =======================================================
+     INITIALIZE
+  ======================================================= */
+
+  loadDemoStats();
+
+  loadSettings();
+
+  renderNotificationHistory();
+
+
+  /* =======================================================
+     SYSTEM ONLINE
   ======================================================= */
 
   console.log(
-    "RentoRide Admin Dashboard initialized."
+    "RentoRide Admin Command Center initialized."
   );
 
 });
