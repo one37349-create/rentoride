@@ -1,43 +1,44 @@
+/* =========================================================
+   RentoRide Admin Dashboard
+   FRONTEND NAVIGATION + BUTTON CONTROLS
+========================================================= */
+
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* =====================================================
+  /* =======================================================
      ELEMENTS
-  ===================================================== */
+  ======================================================= */
 
-  const sidebar = document.getElementById("adminSidebar");
-  const overlay = document.getElementById("adminSidebarOverlay");
-  const menuBtn = document.getElementById("adminMenuBtn");
+  const navItems = document.querySelectorAll(".admin-nav-item");
+  const sections = document.querySelectorAll(".admin-section");
 
   const pageTitle = document.getElementById("adminPageTitle");
 
-  const notificationPopup =
-    document.getElementById("adminNotificationPopup");
+  const menuBtn = document.getElementById("adminMenuBtn");
+  const sidebar = document.getElementById("adminSidebar");
+  const overlay = document.getElementById("adminSidebarOverlay");
+
+  const logoutBtn = document.getElementById("adminLogoutBtn");
 
   const notificationBtn =
     document.getElementById("adminNotificationBtn");
 
+  const notificationPopup =
+    document.getElementById("adminNotificationPopup");
+
   const closeNotificationPopup =
     document.getElementById("closeAdminNotificationPopup");
 
-  const logoutBtn =
-    document.getElementById("adminLogoutBtn");
-
   const detailModal =
     document.getElementById("adminDetailModal");
-
-  const detailModalTitle =
-    document.getElementById("adminDetailModalTitle");
-
-  const detailModalContent =
-    document.getElementById("adminDetailModalContent");
 
   const closeDetailModal =
     document.getElementById("closeAdminDetailModal");
 
 
-  /* =====================================================
+  /* =======================================================
      SECTION TITLES
-  ===================================================== */
+  ======================================================= */
 
   const sectionTitles = {
     overview: "Command Center",
@@ -54,58 +55,72 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
 
-  /* =====================================================
-     OPEN SECTION
-  ===================================================== */
+  /* =======================================================
+     SHOW SECTION
+  ======================================================= */
 
-  function openSection(sectionName) {
+  function showSection(sectionName) {
 
-    const sections =
-      document.querySelectorAll(".admin-section");
+    if (!sectionName) return;
 
-    const navItems =
-      document.querySelectorAll(".admin-nav-item");
+    const targetSection =
+      document.getElementById(
+        "admin-section-" + sectionName
+      );
+
+    if (!targetSection) {
+      console.warn(
+        "Section not found:",
+        sectionName
+      );
+      return;
+    }
+
+    /* Hide all sections */
 
     sections.forEach(section => {
       section.classList.remove("active");
     });
 
+    /* Show selected section */
+
+    targetSection.classList.add("active");
+
+
+    /* Update navigation */
+
     navItems.forEach(item => {
-      item.classList.remove("active");
+
+      if (item.dataset.section === sectionName) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+
     });
 
 
-    const targetSection =
-      document.getElementById(
-        `admin-section-${sectionName}`
-      );
-
-    const targetNav =
-      document.querySelector(
-        `.admin-nav-item[data-section="${sectionName}"]`
-      );
-
-
-    if (targetSection) {
-      targetSection.classList.add("active");
-    }
-
-    if (targetNav) {
-      targetNav.classList.add("active");
-    }
+    /* Update title */
 
     if (pageTitle) {
       pageTitle.textContent =
         sectionTitles[sectionName] ||
-        "Command Center";
+        "Admin Dashboard";
     }
 
 
-    /* Mobile close */
+    /* Close mobile sidebar */
 
-    sidebar?.classList.remove("open");
-    overlay?.classList.remove("active");
+    if (sidebar) {
+      sidebar.classList.remove("open");
+    }
 
+    if (overlay) {
+      overlay.classList.remove("active");
+    }
+
+
+    /* Scroll top */
 
     window.scrollTo({
       top: 0,
@@ -115,31 +130,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
+  /* =======================================================
      SIDEBAR NAVIGATION
-  ===================================================== */
+  ======================================================= */
 
-  document
-    .querySelectorAll(".admin-nav-item")
-    .forEach(item => {
+  navItems.forEach(item => {
 
-      item.addEventListener("click", () => {
+    item.addEventListener("click", () => {
 
-        const section =
-          item.dataset.section;
+      const sectionName =
+        item.getAttribute("data-section");
 
-        if (section) {
-          openSection(section);
-        }
-
-      });
+      showSection(sectionName);
 
     });
 
+  });
 
-  /* =====================================================
-     INTERNAL SECTION BUTTONS
-  ===================================================== */
+
+  /* =======================================================
+     VIEW ALL / QUICK ACTION BUTTONS
+  ======================================================= */
 
   document
     .querySelectorAll("[data-section-link]")
@@ -149,39 +160,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
         event.preventDefault();
 
-        const section =
-          button.dataset.sectionLink;
+        const sectionName =
+          button.getAttribute("data-section-link");
 
-        if (section) {
-          openSection(section);
-        }
+        showSection(sectionName);
 
       });
 
     });
 
 
-  /* =====================================================
+  /* =======================================================
      MOBILE MENU
-  ===================================================== */
+  ======================================================= */
 
-  if (menuBtn) {
+  if (menuBtn && sidebar) {
 
     menuBtn.addEventListener("click", () => {
 
-      sidebar?.classList.add("open");
-      overlay?.classList.add("active");
+      sidebar.classList.toggle("open");
+
+      if (overlay) {
+        overlay.classList.toggle("active");
+      }
 
     });
 
   }
 
 
+  /* =======================================================
+     MOBILE OVERLAY
+  ======================================================= */
+
   if (overlay) {
 
     overlay.addEventListener("click", () => {
 
-      sidebar?.classList.remove("open");
+      sidebar.classList.remove("open");
       overlay.classList.remove("active");
 
     });
@@ -189,55 +205,66 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
+  /* =======================================================
      NOTIFICATION POPUP
-  ===================================================== */
+  ======================================================= */
 
   function showNotification(title, message) {
 
     if (!notificationPopup) return;
 
     const titleElement =
-      document.getElementById("adminPopupTitle");
+      document.getElementById(
+        "adminPopupTitle"
+      );
 
     const messageElement =
-      document.getElementById("adminPopupMessage");
-
+      document.getElementById(
+        "adminPopupMessage"
+      );
 
     if (titleElement) {
-      titleElement.textContent = title;
+      titleElement.textContent =
+        title || "System Notification";
     }
 
     if (messageElement) {
-      messageElement.textContent = message;
+      messageElement.textContent =
+        message || "You have a new notification.";
     }
-
 
     notificationPopup.classList.add("show");
 
+    setTimeout(() => {
 
-    clearTimeout(window.adminNotificationTimer);
+      notificationPopup.classList.remove("show");
 
-    window.adminNotificationTimer =
-      setTimeout(() => {
-
-        notificationPopup.classList.remove("show");
-
-      }, 5000);
+    }, 5000);
 
   }
 
+
+  /* =======================================================
+     NOTIFICATION BUTTON
+  ======================================================= */
 
   if (notificationBtn) {
 
     notificationBtn.addEventListener("click", () => {
 
-      openSection("notifications");
+      showNotification(
+        "Notifications",
+        "Your RentoRide notification center is ready."
+      );
 
     });
 
   }
 
+
+  /* =======================================================
+     CLOSE NOTIFICATION
+  ======================================================= */
 
   if (closeNotificationPopup) {
 
@@ -245,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "click",
       () => {
 
-        notificationPopup?.classList.remove("show");
+        notificationPopup.classList.remove("show");
 
       }
     );
@@ -253,20 +280,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
+  /* =======================================================
      DETAIL MODAL
-  ===================================================== */
+  ======================================================= */
 
   function openDetailModal(title, content) {
 
     if (!detailModal) return;
 
-    if (detailModalTitle) {
-      detailModalTitle.textContent = title;
+    const titleElement =
+      document.getElementById(
+        "adminDetailModalTitle"
+      );
+
+    const contentElement =
+      document.getElementById(
+        "adminDetailModalContent"
+      );
+
+    if (titleElement) {
+      titleElement.textContent = title;
     }
 
-    if (detailModalContent) {
-      detailModalContent.innerHTML = content;
+    if (contentElement) {
+      contentElement.innerHTML = content;
     }
 
     detailModal.classList.add("show");
@@ -274,9 +311,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  /* =======================================================
+     CLOSE DETAIL MODAL
+  ======================================================= */
+
   function closeModal() {
 
-    detailModal?.classList.remove("show");
+    if (!detailModal) return;
+
+    detailModal.classList.remove("show");
 
   }
 
@@ -298,152 +341,26 @@ document.addEventListener("DOMContentLoaded", () => {
         ".admin-modal-overlay"
       );
 
-    modalOverlay?.addEventListener(
-      "click",
-      closeModal
-    );
+    if (modalOverlay) {
 
-  }
-
-
-  /* ESC CLOSE */
-
-  document.addEventListener("keydown", event => {
-
-    if (event.key === "Escape") {
-      closeModal();
-    }
-
-  });
-
-
-  /* =====================================================
-     ADMIN DETAIL BUTTONS
-  ===================================================== */
-
-  document.addEventListener("click", event => {
-
-    const button =
-      event.target.closest(
-        "[data-admin-detail]"
+      modalOverlay.addEventListener(
+        "click",
+        closeModal
       );
 
-    if (!button) return;
-
-
-    const title =
-      button.dataset.title ||
-      "Details";
-
-
-    const content =
-      button.dataset.content ||
-      "<p>No additional information available.</p>";
-
-
-    openDetailModal(
-      title,
-      content
-    );
-
-  });
-
-
-  /* =====================================================
-     USER SEARCH
-  ===================================================== */
-
-  const userSearch =
-    document.getElementById("userSearch");
-
-  if (userSearch) {
-
-    userSearch.addEventListener(
-      "input",
-      () => {
-
-        const search =
-          userSearch.value
-            .toLowerCase()
-            .trim();
-
-
-        document
-          .querySelectorAll(
-            "#usersTable tbody tr"
-          )
-          .forEach(row => {
-
-            const text =
-              row.textContent
-                .toLowerCase();
-
-
-            row.style.display =
-              text.includes(search)
-                ? ""
-                : "none";
-
-          });
-
-      }
-    );
+    }
 
   }
 
 
-  /* =====================================================
-     OWNER SEARCH
-  ===================================================== */
-
-  const ownerSearch =
-    document.getElementById("ownerSearch");
-
-  if (ownerSearch) {
-
-    ownerSearch.addEventListener(
-      "input",
-      () => {
-
-        const search =
-          ownerSearch.value
-            .toLowerCase()
-            .trim();
-
-
-        document
-          .querySelectorAll(
-            "#ownersTable tbody tr"
-          )
-          .forEach(row => {
-
-            const text =
-              row.textContent
-                .toLowerCase();
-
-
-            row.style.display =
-              text.includes(search)
-                ? ""
-                : "none";
-
-          });
-
-      }
-    );
-
-  }
-
-
-  /* =====================================================
-     VEHICLE FILTER
-  ===================================================== */
+  /* =======================================================
+     VEHICLE FILTERS
+  ======================================================= */
 
   const vehicleFilters =
     document.querySelectorAll(
       "[data-vehicle-filter]"
     );
-
 
   vehicleFilters.forEach(button => {
 
@@ -455,53 +372,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
       button.classList.add("active");
 
-
       const filter =
-        button.dataset.vehicleFilter;
+        button.getAttribute(
+          "data-vehicle-filter"
+        );
 
-
-      document
-        .querySelectorAll(
-          ".admin-vehicle-card"
-        )
-        .forEach(card => {
-
-          const status =
-            (
-              card.dataset.status ||
-              ""
-            ).toLowerCase();
-
-
-          if (
-            filter === "all" ||
-            status === filter
-          ) {
-
-            card.style.display = "";
-
-          } else {
-
-            card.style.display = "none";
-
-          }
-
-        });
+      console.log(
+        "Vehicle filter:",
+        filter
+      );
 
     });
 
   });
 
 
-  /* =====================================================
-     BOOKING FILTER
-  ===================================================== */
+  /* =======================================================
+     BOOKING FILTERS
+  ======================================================= */
 
   const bookingFilters =
     document.querySelectorAll(
       ".admin-booking-filter"
     );
-
 
   bookingFilters.forEach(button => {
 
@@ -513,54 +406,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
       button.classList.add("active");
 
-
       const filter =
-        button.dataset.bookingFilter;
+        button.getAttribute(
+          "data-booking-filter"
+        );
 
-
-      document
-        .querySelectorAll(
-          "#adminBookingsTable tbody tr"
-        )
-        .forEach(row => {
-
-          const status =
-            (
-              row.dataset.status ||
-              row.textContent ||
-              ""
-            ).toLowerCase();
-
-
-          if (
-            filter === "all" ||
-            status.includes(filter)
-          ) {
-
-            row.style.display = "";
-
-          } else {
-
-            row.style.display = "none";
-
-          }
-
-        });
+      console.log(
+        "Booking filter:",
+        filter
+      );
 
     });
 
   });
 
 
-  /* =====================================================
-     SUPPORT FILTER
-  ===================================================== */
+  /* =======================================================
+     SUPPORT FILTERS
+  ======================================================= */
 
   const supportFilters =
     document.querySelectorAll(
       ".support-filter"
     );
-
 
   supportFilters.forEach(button => {
 
@@ -572,53 +440,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
       button.classList.add("active");
 
-
       const filter =
-        button.dataset.supportFilter;
+        button.getAttribute(
+          "data-support-filter"
+        );
 
-
-      document
-        .querySelectorAll(
-          ".support-case"
-        )
-        .forEach(card => {
-
-          const status =
-            (
-              card.dataset.status ||
-              ""
-            ).toLowerCase();
-
-
-          if (
-            filter === "all" ||
-            status === filter
-          ) {
-
-            card.style.display = "";
-
-          } else {
-
-            card.style.display = "none";
-
-          }
-
-        });
+      console.log(
+        "Support filter:",
+        filter
+      );
 
     });
 
   });
 
 
-  /* =====================================================
-     REVENUE PERIOD
-  ===================================================== */
+  /* =======================================================
+     USER SEARCH
+  ======================================================= */
 
-  const revenuePeriod =
-    document.getElementById(
-      "revenuePeriod"
+  const userSearch =
+    document.getElementById("userSearch");
+
+  if (userSearch) {
+
+    userSearch.addEventListener(
+      "input",
+      () => {
+
+        console.log(
+          "Searching users:",
+          userSearch.value
+        );
+
+      }
     );
 
+  }
+
+
+  /* =======================================================
+     OWNER SEARCH
+  ======================================================= */
+
+  const ownerSearch =
+    document.getElementById("ownerSearch");
+
+  if (ownerSearch) {
+
+    ownerSearch.addEventListener(
+      "input",
+      () => {
+
+        console.log(
+          "Searching owners:",
+          ownerSearch.value
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     REVENUE PERIOD
+  ======================================================= */
+
+  const revenuePeriod =
+    document.getElementById("revenuePeriod");
 
   if (revenuePeriod) {
 
@@ -632,8 +522,8 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         showNotification(
-          "Chart Updated",
-          `Revenue period changed to last ${revenuePeriod.value} days.`
+          "Revenue Analytics",
+          "Showing revenue data for the selected period."
         );
 
       }
@@ -642,89 +532,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
-     NOTIFICATION BROADCAST
-  ===================================================== */
+  /* =======================================================
+     SEND ADMIN NOTIFICATION
+  ======================================================= */
 
   const notificationForm =
     document.getElementById(
       "adminNotificationForm"
     );
-
-
-  function renderNotificationHistory() {
-
-    const container =
-      document.getElementById(
-        "adminNotificationHistory"
-      );
-
-    if (!container) return;
-
-
-    let notifications = [];
-
-    try {
-
-      notifications =
-        JSON.parse(
-          localStorage.getItem(
-            "rentoride_admin_notifications"
-          ) || "[]"
-        );
-
-    } catch {
-
-      notifications = [];
-
-    }
-
-
-    if (!notifications.length) {
-
-      container.innerHTML = `
-        <div class="admin-empty">
-          No notifications sent yet.
-        </div>
-      `;
-
-      return;
-
-    }
-
-
-    container.innerHTML =
-      notifications
-        .map(notification => {
-
-          return `
-            <div class="admin-notification-item">
-
-              <div>
-
-                <strong>
-                  ${escapeHTML(notification.title)}
-                </strong>
-
-                <p>
-                  ${escapeHTML(notification.message)}
-                </p>
-
-                <small>
-                  To: ${escapeHTML(notification.audience)}
-                  • ${escapeHTML(notification.time)}
-                </small>
-
-              </div>
-
-            </div>
-          `;
-
-        })
-        .join("");
-
-  }
-
 
   if (notificationForm) {
 
@@ -734,18 +549,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         event.preventDefault();
 
-
         const audience =
           document.getElementById(
             "notificationAudience"
-          )?.value || "all";
-
+          )?.value;
 
         const title =
           document.getElementById(
             "notificationTitle"
           )?.value.trim();
-
 
         const message =
           document.getElementById(
@@ -765,62 +577,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        const notification = {
-
+        console.log({
           audience,
           title,
-          message,
-
-          time:
-            new Date()
-              .toLocaleString(
-                "en-IN"
-              )
-
-        };
-
-
-        let oldNotifications = [];
-
-        try {
-
-          oldNotifications =
-            JSON.parse(
-              localStorage.getItem(
-                "rentoride_admin_notifications"
-              ) || "[]"
-            );
-
-        } catch {
-
-          oldNotifications = [];
-
-        }
-
-
-        oldNotifications.unshift(
-          notification
-        );
-
-
-        localStorage.setItem(
-          "rentoride_admin_notifications",
-          JSON.stringify(
-            oldNotifications.slice(0, 20)
-          )
-        );
-
-
-        notificationForm.reset();
+          message
+        });
 
 
         showNotification(
           "Notification Sent",
-          `Notification sent successfully to ${audience}.`
+          "Your notification has been prepared successfully."
         );
 
 
-        renderNotificationHistory();
+        notificationForm.reset();
 
       }
     );
@@ -828,15 +598,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
-     PLATFORM SETTINGS
-  ===================================================== */
+  /* =======================================================
+     SAVE PLATFORM SETTINGS
+  ======================================================= */
 
   const saveSettings =
     document.getElementById(
       "saveAdminSettings"
     );
-
 
   if (saveSettings) {
 
@@ -844,45 +613,44 @@ document.addEventListener("DOMContentLoaded", () => {
       "click",
       () => {
 
-        const settings = {
+        const commission =
+          document.getElementById(
+            "platformCommissionRate"
+          )?.value;
 
-          commission:
-            document.getElementById(
-              "platformCommissionRate"
-            )?.value || 10,
+        const minimumWithdrawal =
+          document.getElementById(
+            "minimumWithdrawal"
+          )?.value;
 
-          minimumWithdrawal:
-            document.getElementById(
-              "minimumWithdrawal"
-            )?.value || 500,
+        const deliveryCharge =
+          document.getElementById(
+            "defaultDeliveryCharge"
+          )?.value;
 
-          deliveryCharge:
-            document.getElementById(
-              "defaultDeliveryCharge"
-            )?.value || 100,
+        const allowBookings =
+          document.getElementById(
+            "allowBookings"
+          )?.checked;
 
-          allowBookings:
-            document.getElementById(
-              "allowBookings"
-            )?.checked ?? true,
-
-          maintenanceMode:
-            document.getElementById(
-              "maintenanceMode"
-            )?.checked ?? false
-
-        };
+        const maintenanceMode =
+          document.getElementById(
+            "maintenanceMode"
+          )?.checked;
 
 
-        localStorage.setItem(
-          "rentoride_admin_settings",
-          JSON.stringify(settings)
-        );
+        console.log({
+          commission,
+          minimumWithdrawal,
+          deliveryCharge,
+          allowBookings,
+          maintenanceMode
+        });
 
 
         showNotification(
           "Settings Saved",
-          "RentoRide platform settings have been updated."
+          "Platform settings have been saved."
         );
 
       }
@@ -891,115 +659,48 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
-     LOAD SETTINGS
-  ===================================================== */
+  /* =======================================================
+     SECURITY BUTTONS
+  ======================================================= */
 
-  function loadSettings() {
+  const securityBtn =
+    document.getElementById(
+      "adminSecurityBtn"
+    );
 
-    let saved;
+  if (securityBtn) {
 
-    try {
+    securityBtn.addEventListener(
+      "click",
+      () => {
 
-      saved =
-        JSON.parse(
-          localStorage.getItem(
-            "rentoride_admin_settings"
-          ) || "null"
+        openDetailModal(
+          "Admin Security",
+          `
+            <div class="admin-modal-message">
+              <h3>Security Center</h3>
+              <p>
+                Admin security controls will be connected
+                to Supabase authentication later.
+              </p>
+            </div>
+          `
         );
 
-    } catch {
-
-      saved = null;
-
-    }
-
-
-    if (!saved) return;
-
-
-    const commission =
-      document.getElementById(
-        "platformCommissionRate"
-      );
-
-    const minimumWithdrawal =
-      document.getElementById(
-        "minimumWithdrawal"
-      );
-
-    const deliveryCharge =
-      document.getElementById(
-        "defaultDeliveryCharge"
-      );
-
-    const allowBookings =
-      document.getElementById(
-        "allowBookings"
-      );
-
-    const maintenanceMode =
-      document.getElementById(
-        "maintenanceMode"
-      );
-
-
-    if (
-      commission &&
-      saved.commission !== undefined
-    ) {
-      commission.value =
-        saved.commission;
-    }
-
-
-    if (
-      minimumWithdrawal &&
-      saved.minimumWithdrawal !== undefined
-    ) {
-      minimumWithdrawal.value =
-        saved.minimumWithdrawal;
-    }
-
-
-    if (
-      deliveryCharge &&
-      saved.deliveryCharge !== undefined
-    ) {
-      deliveryCharge.value =
-        saved.deliveryCharge;
-    }
-
-
-    if (
-      allowBookings &&
-      saved.allowBookings !== undefined
-    ) {
-      allowBookings.checked =
-        saved.allowBookings;
-    }
-
-
-    if (
-      maintenanceMode &&
-      saved.maintenanceMode !== undefined
-    ) {
-      maintenanceMode.checked =
-        saved.maintenanceMode;
-    }
+      }
+    );
 
   }
 
 
-  /* =====================================================
+  /* =======================================================
      ACTIVITY LOG
-  ===================================================== */
+  ======================================================= */
 
   const activityLogBtn =
     document.getElementById(
       "adminActivityLogBtn"
     );
-
 
   if (activityLogBtn) {
 
@@ -1010,23 +711,12 @@ document.addEventListener("DOMContentLoaded", () => {
         openDetailModal(
           "Admin Activity Log",
           `
-            <div class="admin-log-content">
-
+            <div class="admin-modal-message">
+              <h3>Activity Log</h3>
               <p>
-                <strong>System:</strong>
-                Admin dashboard opened.
+                Admin actions will appear here after
+                Supabase logging is connected.
               </p>
-
-              <p>
-                <strong>Status:</strong>
-                Platform operational.
-              </p>
-
-              <p>
-                <strong>Security:</strong>
-                No critical security events detected.
-              </p>
-
             </div>
           `
         );
@@ -1037,131 +727,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
-     SECURITY BUTTON
-  ===================================================== */
-
-  const securityBtn =
-    document.getElementById(
-      "adminSecurityBtn"
-    );
-
-
-  if (securityBtn) {
-
-    securityBtn.addEventListener(
-      "click",
-      () => {
-
-        openDetailModal(
-          "Security Settings",
-          `
-            <div class="admin-log-content">
-
-              <p>
-                <strong>Admin Protection</strong>
-              </p>
-
-              <p>
-                Security controls will be connected
-                with Supabase authentication later.
-              </p>
-
-              <p>
-                For now your admin interface is running
-                in local dashboard mode.
-              </p>
-
-            </div>
-          `
-        );
-
-      }
-    );
-
-  }
-
-
-  /* =====================================================
-     NOTIFICATION HISTORY LOAD
-  ===================================================== */
-
-  renderNotificationHistory();
-
-
-  /* =====================================================
-     ADMIN NAME
-  ===================================================== */
-
-  const savedAdminName =
-    localStorage.getItem(
-      "rentoride_admin_name"
-    );
-
-
-  if (savedAdminName) {
-
-    const nameElements = [
-
-      document.getElementById(
-        "adminName"
-      ),
-
-      document.getElementById(
-        "adminHeaderName"
-      ),
-
-      document.getElementById(
-        "welcomeAdminName"
-      )
-
-    ];
-
-
-    nameElements.forEach(element => {
-
-      if (element) {
-        element.textContent =
-          savedAdminName;
-      }
-
-    });
-
-
-    const firstLetter =
-      savedAdminName
-        .charAt(0)
-        .toUpperCase();
-
-
-    const avatarElements = [
-
-      document.getElementById(
-        "adminAvatar"
-      ),
-
-      document.getElementById(
-        "adminHeaderAvatar"
-      )
-
-    ];
-
-
-    avatarElements.forEach(element => {
-
-      if (element) {
-        element.textContent =
-          firstLetter;
-      }
-
-    });
-
-  }
-
-
-  /* =====================================================
+  /* =======================================================
      LOGOUT
-  ===================================================== */
+  ======================================================= */
 
   if (logoutBtn) {
 
@@ -1174,21 +742,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "Are you sure you want to logout?"
           );
 
-
         if (!confirmLogout) return;
 
-
         /*
-          Abhi local admin session clear.
-          Supabase connect hone ke baad
-          yahin supabase.auth.signOut()
-          add karenge.
+          Supabase logout will be connected later.
         */
-
-        localStorage.removeItem(
-          "rentoride_admin_logged_in"
-        );
-
 
         window.location.href =
           "login.html";
@@ -1199,33 +757,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =====================================================
-     HELPERS
-  ===================================================== */
+  /* =======================================================
+     INITIALIZE
+  ======================================================= */
 
-  function escapeHTML(value) {
-
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-
-  /* =====================================================
-     INITIAL LOAD
-  ===================================================== */
-
-  loadSettings();
-
-  openSection("overview");
+  showSection("overview");
 
 
   console.log(
-    "RentoRide Admin Dashboard JS loaded successfully."
+    "RentoRide Admin Dashboard initialized successfully."
   );
 
 });
