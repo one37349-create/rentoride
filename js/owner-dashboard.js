@@ -1,79 +1,132 @@
-/* =========================================================
-   RentoRide — Owner Dashboard JS
-   ========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* =======================================================
-     ELEMENTS
-     ======================================================= */
+  /* =========================
+     BASIC ELEMENTS
+  ========================= */
 
   const navItems = document.querySelectorAll(".nav-item");
   const sections = document.querySelectorAll(".dashboard-section");
 
-  const sidebar = document.querySelector(".sidebar");
-  const sidebarOverlay = document.querySelector(".sidebar-overlay");
-  const menuBtn = document.querySelector(".menu-btn");
+  const pageTitle = document.getElementById("pageTitle");
 
-  const notificationBtn = document.querySelector(".notification-btn");
-  const notificationPopup = document.querySelector(".notification-popup");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+  const menuBtn = document.getElementById("menuBtn");
 
-  const modal = document.querySelector(".modal");
-  const modalClose = document.querySelector(".modal-close");
-  const modalOverlay = document.querySelector(".modal-overlay");
+  const notificationBtn =
+    document.getElementById("headerNotificationBtn");
 
-  const bookingFilters = document.querySelectorAll(".booking-filter");
+  const notificationPopup =
+    document.getElementById("notificationPopup");
 
-  /* =======================================================
-     SECTION NAVIGATION
-     ======================================================= */
+  const closeNotificationPopup =
+    document.getElementById("closeNotificationPopup");
 
-  navItems.forEach((item) => {
+
+  /* =========================
+     SECTION TITLES
+  ========================= */
+
+  const sectionTitles = {
+    overview: "Dashboard",
+    vehicles: "My Vehicles",
+    bookings: "Booking Requests",
+    earnings: "Earnings",
+    verification: "Verification",
+    notifications: "Notifications",
+    profile: "My Profile",
+    settings: "Settings"
+  };
+
+
+  /* =========================
+     OPEN SECTION
+  ========================= */
+
+  function openSection(sectionName) {
+
+    if (!sectionName) return;
+
+    sections.forEach(section => {
+      section.classList.remove("active");
+    });
+
+    const target =
+      document.getElementById(
+        "section-" + sectionName
+      );
+
+    if (target) {
+      target.classList.add("active");
+    }
+
+    navItems.forEach(item => {
+      item.classList.remove("active");
+
+      if (
+        item.dataset.section === sectionName
+      ) {
+        item.classList.add("active");
+      }
+    });
+
+    if (pageTitle) {
+      pageTitle.textContent =
+        sectionTitles[sectionName] ||
+        "Dashboard";
+    }
+
+    closeSidebar();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+
+  /* =========================
+     SIDEBAR NAVIGATION
+  ========================= */
+
+  navItems.forEach(item => {
 
     item.addEventListener("click", () => {
 
-      const target = item.dataset.section;
-
-      if (!target) return;
-
-      /* Remove active from navigation */
-      navItems.forEach((nav) => {
-        nav.classList.remove("active");
-      });
-
-      /* Add active */
-      item.classList.add("active");
-
-      /* Hide all sections */
-      sections.forEach((section) => {
-        section.classList.remove("active");
-      });
-
-      /* Show selected section */
-      const targetSection =
-        document.getElementById(target);
-
-      if (targetSection) {
-        targetSection.classList.add("active");
-      }
-
-      /* Close mobile sidebar */
-      closeSidebar();
-
-      /* Scroll top */
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
+      openSection(
+        item.dataset.section
+      );
 
     });
 
   });
 
 
-  /* =======================================================
+  /* =========================
+     VIEW ALL / MANAGE BUTTONS
+  ========================= */
+
+  document.addEventListener("click", event => {
+
+    const sectionButton =
+      event.target.closest(
+        "[data-section-link]"
+      );
+
+    if (!sectionButton) return;
+
+    event.preventDefault();
+
+    openSection(
+      sectionButton.dataset.sectionLink
+    );
+
+  });
+
+
+  /* =========================
      MOBILE SIDEBAR
-     ======================================================= */
+  ========================= */
 
   function openSidebar() {
 
@@ -87,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
+
   function closeSidebar() {
 
     if (sidebar) {
@@ -99,9 +153,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
+
   if (menuBtn) {
-    menuBtn.addEventListener("click", openSidebar);
+    menuBtn.addEventListener(
+      "click",
+      openSidebar
+    );
   }
+
 
   if (sidebarOverlay) {
     sidebarOverlay.addEventListener(
@@ -111,718 +170,61 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =======================================================
+  /* =========================
      NOTIFICATION POPUP
-     ======================================================= */
+  ========================= */
 
   if (notificationBtn) {
 
-    notificationBtn.addEventListener("click", () => {
+    notificationBtn.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        if (notificationPopup) {
+          notificationPopup.classList.toggle(
+            "show"
+          );
+        }
+
+      }
+    );
+
+  }
+
+
+  if (closeNotificationPopup) {
+
+    closeNotificationPopup.addEventListener(
+      "click",
+      () => {
+
+        if (notificationPopup) {
+          notificationPopup.classList.remove(
+            "show"
+          );
+        }
+
+      }
+    );
+
+  }
+
+
+  document.addEventListener(
+    "click",
+    event => {
 
       if (!notificationPopup) return;
 
-      notificationPopup.classList.toggle("show");
-
-    });
-
-  }
-
-
-  /* Close notification */
-
-  const notificationClose =
-    document.querySelector(
-      ".notification-popup > button"
-    );
-
-  if (notificationClose) {
-
-    notificationClose.addEventListener(
-      "click",
-      () => {
-
-        notificationPopup.classList.remove("show");
-
-      }
-    );
-
-  }
-
-
-  /* =======================================================
-     MODAL FUNCTIONS
-     ======================================================= */
-
-  function openModal() {
-
-    if (!modal) return;
-
-    modal.classList.add("show");
-
-    document.body.style.overflow = "hidden";
-
-  }
-
-
-  function closeModal() {
-
-    if (!modal) return;
-
-    modal.classList.remove("show");
-
-    document.body.style.overflow = "";
-
-  }
-
-
-  if (modalClose) {
-    modalClose.addEventListener(
-      "click",
-      closeModal
-    );
-  }
-
-
-  if (modalOverlay) {
-    modalOverlay.addEventListener(
-      "click",
-      closeModal
-    );
-  }
-
-
-  /* ESC key */
-
-  document.addEventListener("keydown", (event) => {
-
-    if (event.key === "Escape") {
-
-      closeModal();
-      closeSidebar();
-
-      if (notificationPopup) {
-        notificationPopup.classList.remove("show");
-      }
-
-    }
-
-  });
-
-
-  /* =======================================================
-     OPEN MODAL BUTTONS
-     ======================================================= */
-
-  const modalOpenButtons =
-    document.querySelectorAll(
-      "[data-open-modal]"
-    );
-
-  modalOpenButtons.forEach((button) => {
-
-    button.addEventListener(
-      "click",
-      openModal
-    );
-
-  });
-
-
-  /* =======================================================
-     BOOKING FILTER
-     ======================================================= */
-
-  bookingFilters.forEach((filter) => {
-
-    filter.addEventListener("click", () => {
-
-      bookingFilters.forEach((item) => {
-        item.classList.remove("active");
-      });
-
-      filter.classList.add("active");
-
-      const selectedFilter =
-        filter.dataset.filter || "all";
-
-      filterBookings(selectedFilter);
-
-    });
-
-  });
-
-
-  function filterBookings(filter) {
-
-    const bookings =
-      document.querySelectorAll(
-        ".booking-row"
-      );
-
-    bookings.forEach((booking) => {
-
-      if (filter === "all") {
-
-        booking.style.display = "";
-
-        return;
-
-      }
-
-      const status =
-        booking.dataset.status;
-
-      if (status === filter) {
-
-        booking.style.display = "";
-
-      } else {
-
-        booking.style.display = "none";
-
-      }
-
-    });
-
-  }
-
-
-  /* =======================================================
-     ACCEPT / REJECT BOOKING
-     ======================================================= */
-
-  document.addEventListener(
-    "click",
-    (event) => {
-
-      const acceptButton =
-        event.target.closest(".accept-btn");
-
-      const rejectButton =
-        event.target.closest(".reject-btn");
-
-
-      /* ACCEPT */
-
-      if (acceptButton) {
-
-        const booking =
-          acceptButton.closest(".booking-row");
-
-        if (!booking) return;
-
-        booking.dataset.status = "confirmed";
-
-        const status =
-          booking.querySelector(
-            ".booking-status"
-          );
-
-        if (status) {
-
-          status.textContent =
-            "Confirmed";
-
-          status.classList.remove(
-            "status-pending"
-          );
-
-          status.classList.add(
-            "status-confirmed"
-          );
-
-        }
-
-        acceptButton.remove();
-
-        showToast(
-          "Booking confirmed successfully."
-        );
-
-      }
-
-
-      /* REJECT */
-
-      if (rejectButton) {
-
-        const booking =
-          rejectButton.closest(".booking-row");
-
-        if (!booking) return;
-
-        booking.dataset.status = "rejected";
-
-        const status =
-          booking.querySelector(
-            ".booking-status"
-          );
-
-        if (status) {
-
-          status.textContent =
-            "Rejected";
-
-          status.classList.remove(
-            "status-pending"
-          );
-
-          status.classList.add(
-            "status-rejected"
-          );
-
-        }
-
-        rejectButton.remove();
-
-        showToast(
-          "Booking rejected."
-        );
-
-      }
-
-    }
-  );
-
-
-  /* =======================================================
-     TOAST
-     ======================================================= */
-
-  function showToast(message) {
-
-    let toast =
-      document.querySelector(
-        ".rr-toast"
-      );
-
-    if (!toast) {
-
-      toast =
-        document.createElement("div");
-
-      toast.className =
-        "rr-toast";
-
-      document.body.appendChild(toast);
-
-      toast.style.position = "fixed";
-      toast.style.bottom = "25px";
-      toast.style.right = "25px";
-      toast.style.zIndex = "9999";
-      toast.style.padding = "14px 18px";
-      toast.style.borderRadius = "12px";
-      toast.style.background = "#171717";
-      toast.style.color = "#ffffff";
-      toast.style.border =
-        "1px solid rgba(255,210,31,.35)";
-      toast.style.boxShadow =
-        "0 15px 40px rgba(0,0,0,.5)";
-      toast.style.fontSize = "12px";
-
-    }
-
-    toast.textContent = message;
-
-    toast.style.display = "block";
-
-    clearTimeout(
-      window.rrToastTimer
-    );
-
-    window.rrToastTimer =
-      setTimeout(() => {
-
-        toast.style.display =
-          "none";
-
-      }, 3000);
-
-  }
-
-
-  /* =======================================================
-     SOUND SELECTION
-     ======================================================= */
-
-  const soundOptions =
-    document.querySelectorAll(
-      ".sound-option input"
-    );
-
-  soundOptions.forEach((radio) => {
-
-    radio.addEventListener(
-      "change",
-      () => {
-
-        if (!radio.checked) return;
-
-        localStorage.setItem(
-          "rentoRideNotificationSound",
-          radio.value
-        );
-
-        showToast(
-          "Notification sound saved."
-        );
-
-      }
-    );
-
-  });
-
-
-  /* =======================================================
-     LOAD SAVED SOUND
-     ======================================================= */
-
-  const savedSound =
-    localStorage.getItem(
-      "rentoRideNotificationSound"
-    );
-
-  if (savedSound) {
-
-    const savedRadio =
-      document.querySelector(
-        `.sound-option input[value="${savedSound}"]`
-      );
-
-    if (savedRadio) {
-      savedRadio.checked = true;
-    }
-
-  }
-
-
-  /* =======================================================
-     SOUND PREVIEW
-     ======================================================= */
-
-  const soundPreviewButtons =
-    document.querySelectorAll(
-      ".sound-preview"
-    );
-
-  soundPreviewButtons.forEach(
-    (button) => {
-
-      button.addEventListener(
-        "click",
-        (event) => {
-
-          event.preventDefault();
-
-          const option =
-            button.closest(
-              ".sound-option"
-            );
-
-          if (!option) return;
-
-          const radio =
-            option.querySelector(
-              "input"
-            );
-
-          if (!radio) return;
-
-          playNotificationSound(
-            radio.value
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  function playNotificationSound(
-    soundName
-  ) {
-
-    /*
-      Actual audio files backend/frontend
-      integration ke time add karenge.
-
-      Abhi browser beep preview.
-    */
-
-    try {
-
-      const AudioContext =
-        window.AudioContext ||
-        window.webkitAudioContext;
-
-      if (!AudioContext) return;
-
-      const audioContext =
-        new AudioContext();
-
-      const oscillator =
-        audioContext.createOscillator();
-
-      const gain =
-        audioContext.createGain();
-
-      oscillator.type =
-        soundName === "classic"
-          ? "sine"
-          : "triangle";
-
-      oscillator.frequency.value =
-        soundName === "classic"
-          ? 700
-          : 900;
-
-      gain.gain.setValueAtTime(
-        0.0001,
-        audioContext.currentTime
-      );
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.15,
-        audioContext.currentTime + 0.02
-      );
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        audioContext.currentTime + 0.35
-      );
-
-      oscillator.connect(gain);
-      gain.connect(
-        audioContext.destination
-      );
-
-      oscillator.start();
-
-      oscillator.stop(
-        audioContext.currentTime + 0.35
-      );
-
-    } catch (error) {
-
-      console.log(
-        "Sound preview unavailable."
-      );
-
-    }
-
-  }
-
-
-  /* =======================================================
-     NOTIFICATION SETTINGS
-     ======================================================= */
-
-  const notificationSwitches =
-    document.querySelectorAll(
-      ".setting-row input[type='checkbox']"
-    );
-
-  notificationSwitches.forEach(
-    (checkbox, index) => {
-
-      const key =
-        `rentoRideNotificationSetting_${index}`;
-
-      const saved =
-        localStorage.getItem(key);
-
-      if (saved !== null) {
-
-        checkbox.checked =
-          saved === "true";
-
-      }
-
-      checkbox.addEventListener(
-        "change",
-        () => {
-
-          localStorage.setItem(
-            key,
-            checkbox.checked
-          );
-
-          showToast(
-            checkbox.checked
-              ? "Notification setting enabled."
-              : "Notification setting disabled."
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  /* =======================================================
-     SAVE BUTTONS
-     ======================================================= */
-
-  const saveButtons =
-    document.querySelectorAll(
-      ".save-btn, .save-settings-btn"
-    );
-
-  saveButtons.forEach((button) => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        showToast(
-          "Settings saved successfully."
-        );
-
-      }
-    );
-
-  });
-
-
-  /* =======================================================
-     WITHDRAW BUTTON
-     ======================================================= */
-
-  const withdrawButton =
-    document.querySelector(
-      ".withdraw-btn"
-    );
-
-  if (withdrawButton) {
-
-    withdrawButton.addEventListener(
-      "click",
-      () => {
-
-        openModal();
-
-      }
-    );
-
-  }
-
-
-  /* =======================================================
-     ADD BANK ACCOUNT
-     ======================================================= */
-
-  const addBankButton =
-    document.querySelector(
-      "[data-add-bank]"
-    );
-
-  if (addBankButton) {
-
-    addBankButton.addEventListener(
-      "click",
-      () => {
-
-        openModal();
-
-      }
-    );
-
-  }
-
-
-  /* =======================================================
-     LOGOUT
-     ======================================================= */
-
-  const logoutButton =
-    document.querySelector(
-      ".logout-btn"
-    );
-
-  if (logoutButton) {
-
-    logoutButton.addEventListener(
-      "click",
-      () => {
-
-        const confirmed =
-          confirm(
-            "Are you sure you want to logout?"
-          );
-
-        if (!confirmed) return;
-
-        /*
-          Supabase logout yaha baad mein
-          connect karenge.
-        */
-
-        localStorage.removeItem(
-          "rentoRideNotificationSound"
-        );
-
-        showToast(
-          "Logging out..."
-        );
-
-      }
-    );
-
-  }
-
-
-  /* =======================================================
-     BACK HOME
-     ======================================================= */
-
-  const backHome =
-    document.querySelector(
-      ".back-home"
-    );
-
-  if (backHome) {
-
-    backHome.addEventListener(
-      "click",
-      () => {
-
-        window.location.href =
-          "index.html";
-
-      }
-    );
-
-  }
-
-
-  /* =======================================================
-     CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
-     ======================================================= */
-
-  document.addEventListener(
-    "click",
-    (event) => {
-
-      if (!notificationPopup ||
-          !notificationBtn) {
-        return;
-      }
-
-      const clickedInsidePopup =
-        notificationPopup.contains(
-          event.target
-        );
-
-      const clickedButton =
-        notificationBtn.contains(
-          event.target
-        );
-
       if (
-        !clickedInsidePopup &&
-        !clickedButton
+        !notificationPopup.contains(
+          event.target
+        ) &&
+        !notificationBtn?.contains(
+          event.target
+        )
       ) {
 
         notificationPopup.classList.remove(
@@ -835,27 +237,897 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
-  /* =======================================================
-     INITIAL PAGE
-     ======================================================= */
+  /* =========================
+     BOOKING FILTERS
+  ========================= */
 
-  const defaultSection =
-    document.querySelector(
-      ".dashboard-section.active"
+  const bookingFilters =
+    document.querySelectorAll(
+      ".booking-filter"
     );
 
-  if (!defaultSection &&
-      sections.length > 0) {
+  bookingFilters.forEach(filter => {
 
-    sections[0].classList.add(
-      "active"
+    filter.addEventListener(
+      "click",
+      () => {
+
+        bookingFilters.forEach(button => {
+          button.classList.remove("active");
+        });
+
+        filter.classList.add("active");
+
+        const selected =
+          filter.dataset.bookingFilter;
+
+        filterBookings(selected);
+
+      }
+    );
+
+  });
+
+
+  function filterBookings(filter) {
+
+    const rows =
+      document.querySelectorAll(
+        ".booking-row"
+      );
+
+    rows.forEach(row => {
+
+      if (filter === "all") {
+
+        row.style.display = "";
+
+        return;
+
+      }
+
+      const status =
+        (
+          row.dataset.status || ""
+        ).toLowerCase();
+
+      if (status === filter) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+
+    });
+
+  }
+
+
+  /* =========================
+     WITHDRAW MODAL
+  ========================= */
+
+  const withdrawModal =
+    document.getElementById(
+      "withdrawModal"
+    );
+
+  const openWithdrawBtn =
+    document.getElementById(
+      "openWithdrawBtn"
+    );
+
+  const closeWithdrawModal =
+    document.getElementById(
+      "closeWithdrawModal"
+    );
+
+
+  function openWithdrawModal() {
+
+    if (!withdrawModal) return;
+
+    withdrawModal.classList.add("show");
+
+    document.body.style.overflow =
+      "hidden";
+
+  }
+
+
+  function closeWithdraw() {
+
+    if (!withdrawModal) return;
+
+    withdrawModal.classList.remove("show");
+
+    document.body.style.overflow = "";
+
+  }
+
+
+  if (openWithdrawBtn) {
+    openWithdrawBtn.addEventListener(
+      "click",
+      openWithdrawModal
+    );
+  }
+
+
+  if (closeWithdrawModal) {
+    closeWithdrawModal.addEventListener(
+      "click",
+      closeWithdraw
+    );
+  }
+
+
+  const withdrawOverlay =
+    withdrawModal?.querySelector(
+      ".modal-overlay"
+    );
+
+  if (withdrawOverlay) {
+
+    withdrawOverlay.addEventListener(
+      "click",
+      closeWithdraw
     );
 
   }
 
 
+  /* =========================
+     BANK MODAL
+  ========================= */
+
+  const bankModal =
+    document.getElementById(
+      "bankModal"
+    );
+
+  const manageBankBtn =
+    document.getElementById(
+      "manageBankBtn"
+    );
+
+  const settingsBankBtn =
+    document.getElementById(
+      "settingsBankBtn"
+    );
+
+  const closeBankModal =
+    document.getElementById(
+      "closeBankModal"
+    );
+
+
+  function openBankModal() {
+
+    if (!bankModal) return;
+
+    bankModal.classList.add("show");
+
+    document.body.style.overflow =
+      "hidden";
+
+  }
+
+
+  function closeBank() {
+
+    if (!bankModal) return;
+
+    bankModal.classList.remove("show");
+
+    document.body.style.overflow = "";
+
+  }
+
+
+  if (manageBankBtn) {
+
+    manageBankBtn.addEventListener(
+      "click",
+      openBankModal
+    );
+
+  }
+
+
+  if (settingsBankBtn) {
+
+    settingsBankBtn.addEventListener(
+      "click",
+      openBankModal
+    );
+
+  }
+
+
+  if (closeBankModal) {
+
+    closeBankModal.addEventListener(
+      "click",
+      closeBank
+    );
+
+  }
+
+
+  const bankOverlay =
+    bankModal?.querySelector(
+      ".modal-overlay"
+    );
+
+  if (bankOverlay) {
+
+    bankOverlay.addEventListener(
+      "click",
+      closeBank
+    );
+
+  }
+
+
+  /* =========================
+     BANK FORM
+  ========================= */
+
+  const bankForm =
+    document.getElementById(
+      "bankForm"
+    );
+
+  if (bankForm) {
+
+    bankForm.addEventListener(
+      "submit",
+      event => {
+
+        event.preventDefault();
+
+        const holder =
+          document.getElementById(
+            "bankHolderName"
+          )?.value.trim();
+
+        const account =
+          document.getElementById(
+            "bankAccountNumber"
+          )?.value.trim();
+
+        const confirmAccount =
+          document.getElementById(
+            "confirmBankAccount"
+          )?.value.trim();
+
+        const ifsc =
+          document.getElementById(
+            "bankIfsc"
+          )?.value.trim();
+
+        const bankName =
+          document.getElementById(
+            "bankName"
+          )?.value.trim();
+
+
+        if (
+          !holder ||
+          !account ||
+          !confirmAccount ||
+          !ifsc ||
+          !bankName
+        ) {
+
+          showToast(
+            "Please fill all bank details."
+          );
+
+          return;
+
+        }
+
+
+        if (account !== confirmAccount) {
+
+          showToast(
+            "Account numbers do not match."
+          );
+
+          return;
+
+        }
+
+
+        localStorage.setItem(
+          "rr_bank_holder",
+          holder
+        );
+
+        localStorage.setItem(
+          "rr_bank_account",
+          account
+        );
+
+        localStorage.setItem(
+          "rr_bank_ifsc",
+          ifsc
+        );
+
+        localStorage.setItem(
+          "rr_bank_name",
+          bankName
+        );
+
+
+        updateBankDisplay();
+
+        closeBank();
+
+        showToast(
+          "Bank account saved successfully."
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================
+     BANK DISPLAY
+  ========================= */
+
+  function updateBankDisplay() {
+
+    const holder =
+      localStorage.getItem(
+        "rr_bank_holder"
+      );
+
+    const account =
+      localStorage.getItem(
+        "rr_bank_account"
+      );
+
+    const ifsc =
+      localStorage.getItem(
+        "rr_bank_ifsc"
+      );
+
+    const bankName =
+      localStorage.getItem(
+        "rr_bank_name"
+      );
+
+
+    const display =
+      document.getElementById(
+        "bankAccountDisplay"
+      );
+
+    const withdrawBank =
+      document.getElementById(
+        "withdrawBankNumber"
+      );
+
+
+    if (!holder || !account) {
+
+      if (withdrawBank) {
+        withdrawBank.textContent =
+          "No bank account added";
+      }
+
+      return;
+
+    }
+
+
+    const masked =
+      "•••• •••• " +
+      account.slice(-4);
+
+
+    if (display) {
+
+      display.innerHTML = `
+        <div class="bank-icon">🏦</div>
+
+        <div>
+          <strong>${bankName}</strong>
+
+          <p>
+            ${holder} • ${masked}
+          </p>
+
+          <small>
+            IFSC: ${ifsc}
+          </small>
+        </div>
+      `;
+
+    }
+
+
+    if (withdrawBank) {
+
+      withdrawBank.textContent =
+        `${bankName} • ${masked}`;
+
+    }
+
+  }
+
+
+  updateBankDisplay();
+
+
+  /* =========================
+     CONFIRM WITHDRAWAL
+  ========================= */
+
+  const confirmWithdrawBtn =
+    document.getElementById(
+      "confirmWithdrawBtn"
+    );
+
+  if (confirmWithdrawBtn) {
+
+    confirmWithdrawBtn.addEventListener(
+      "click",
+      () => {
+
+        const amountInput =
+          document.getElementById(
+            "withdrawAmount"
+          );
+
+        const amount =
+          Number(
+            amountInput?.value
+          );
+
+
+        const availableText =
+          document.getElementById(
+            "availableBalance"
+          )?.textContent || "₹0";
+
+
+        const available =
+          Number(
+            availableText
+              .replace(/[₹,\s]/g, "")
+          ) || 0;
+
+
+        if (amount < 500) {
+
+          showToast(
+            "Minimum withdrawal is ₹500."
+          );
+
+          return;
+
+        }
+
+
+        if (amount > available) {
+
+          showToast(
+            "Insufficient available balance."
+          );
+
+          return;
+
+        }
+
+
+        if (
+          !localStorage.getItem(
+            "rr_bank_account"
+          )
+        ) {
+
+          showToast(
+            "Please add a bank account first."
+          );
+
+          closeWithdraw();
+
+          openBankModal();
+
+          return;
+
+        }
+
+
+        showToast(
+          "Withdrawal request submitted."
+        );
+
+        if (amountInput) {
+          amountInput.value = "";
+        }
+
+        closeWithdraw();
+
+      }
+    );
+
+  }
+
+
+  /* =========================
+     TEST NOTIFICATION SOUND
+  ========================= */
+
+  const testSoundBtn =
+    document.getElementById(
+      "testNotificationSound"
+    );
+
+  if (testSoundBtn) {
+
+    testSoundBtn.addEventListener(
+      "click",
+      () => {
+
+        const selected =
+          document.querySelector(
+            'input[name="notificationSound"]:checked'
+          );
+
+        playSound(
+          selected?.value ||
+          "rentoride-alert"
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================
+     SOUND PREVIEW
+  ========================= */
+
+  document
+    .querySelectorAll(".sound-preview")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        event => {
+
+          event.preventDefault();
+
+          playSound(
+            button.dataset.sound ||
+            "rentoride-alert"
+          );
+
+        }
+      );
+
+    });
+
+
+  function playSound(type) {
+
+    try {
+
+      const AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+      if (!AudioContext) return;
+
+      const ctx =
+        new AudioContext();
+
+
+      const oscillator =
+        ctx.createOscillator();
+
+      const gain =
+        ctx.createGain();
+
+
+      const frequencies = {
+
+        "rentoride-alert": 880,
+
+        "ride-bell": 660,
+
+        "yellow-pulse": 990,
+
+        "quick-chime": 760,
+
+        "booking-ring": 1100
+
+      };
+
+
+      oscillator.frequency.value =
+        frequencies[type] || 880;
+
+
+      oscillator.type =
+        "sine";
+
+
+      gain.gain.setValueAtTime(
+        0.0001,
+        ctx.currentTime
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.12,
+        ctx.currentTime + 0.02
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        ctx.currentTime + 0.4
+      );
+
+
+      oscillator.connect(gain);
+
+      gain.connect(
+        ctx.destination
+      );
+
+
+      oscillator.start();
+
+      oscillator.stop(
+        ctx.currentTime + 0.4
+      );
+
+    } catch (error) {
+
+      console.log(
+        "Sound could not play."
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     SAVE SOUND
+  ========================= */
+
+  document
+    .querySelectorAll(
+      'input[name="notificationSound"]'
+    )
+    .forEach(radio => {
+
+      radio.addEventListener(
+        "change",
+        () => {
+
+          localStorage.setItem(
+            "rr_notification_sound",
+            radio.value
+          );
+
+          showToast(
+            "Notification sound selected."
+          );
+
+        }
+      );
+
+    });
+
+
+  const savedSound =
+    localStorage.getItem(
+      "rr_notification_sound"
+    );
+
+
+  if (savedSound) {
+
+    const radio =
+      document.querySelector(
+        `input[name="notificationSound"][value="${savedSound}"]`
+      );
+
+    if (radio) {
+      radio.checked = true;
+    }
+
+  }
+
+
+  /* =========================
+     NOTIFICATION SETTINGS
+  ========================= */
+
+  const notificationSettings = [
+    "notifyNewBooking",
+    "notifyAccepted",
+    "notifyCancelled",
+    "notifyPickup",
+    "notifyPayment",
+    "notifyDelivery"
+  ];
+
+
+  notificationSettings.forEach(id => {
+
+    const checkbox =
+      document.getElementById(id);
+
+    if (!checkbox) return;
+
+
+    const saved =
+      localStorage.getItem(
+        "rr_" + id
+      );
+
+
+    if (saved !== null) {
+
+      checkbox.checked =
+        saved === "true";
+
+    }
+
+
+    checkbox.addEventListener(
+      "change",
+      () => {
+
+        localStorage.setItem(
+          "rr_" + id,
+          checkbox.checked
+        );
+
+      }
+    );
+
+  });
+
+
+  /* =========================
+     ESCAPE KEY
+  ========================= */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (event.key !== "Escape") return;
+
+      closeSidebar();
+      closeWithdraw();
+      closeBank();
+
+      document
+        .querySelectorAll(".modal")
+        .forEach(modal => {
+          modal.classList.remove("show");
+        });
+
+      if (notificationPopup) {
+        notificationPopup.classList.remove(
+          "show"
+        );
+      }
+
+      document.body.style.overflow = "";
+
+    }
+  );
+
+
+  /* =========================
+     TOAST
+  ========================= */
+
+  function showToast(message) {
+
+    let toast =
+      document.getElementById(
+        "rrToast"
+      );
+
+
+    if (!toast) {
+
+      toast =
+        document.createElement(
+          "div"
+        );
+
+      toast.id = "rrToast";
+
+      toast.style.position =
+        "fixed";
+
+      toast.style.right =
+        "25px";
+
+      toast.style.bottom =
+        "25px";
+
+      toast.style.zIndex =
+        "99999";
+
+      toast.style.padding =
+        "14px 20px";
+
+      toast.style.borderRadius =
+        "12px";
+
+      toast.style.background =
+        "#111";
+
+      toast.style.color =
+        "#fff";
+
+      toast.style.border =
+        "1px solid #f5c400";
+
+      toast.style.fontSize =
+        "14px";
+
+      toast.style.fontWeight =
+        "600";
+
+      toast.style.boxShadow =
+        "0 10px 30px rgba(0,0,0,.4)";
+
+      document.body.appendChild(
+        toast
+      );
+
+    }
+
+
+    toast.textContent =
+      message;
+
+    toast.style.display =
+      "block";
+
+
+    clearTimeout(
+      window.rrToastTimer
+    );
+
+
+    window.rrToastTimer =
+      setTimeout(() => {
+
+        toast.style.display =
+          "none";
+
+      }, 3000);
+
+  }
+
+
+  /* =========================
+     INITIAL STATE
+  ========================= */
+
+  openSection("overview");
+
+
   console.log(
-    "RentoRide Owner Dashboard loaded successfully."
+    "RentoRide Owner Dashboard JS loaded."
   );
 
 });
