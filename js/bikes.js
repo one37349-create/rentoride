@@ -1,3 +1,25 @@
+/* ================= FILTER TOGGLE ================= */
+
+const filterToggle = document.getElementById("filterToggle");
+const filterBox = document.querySelector(".filter-box");
+
+if (filterToggle && filterBox) {
+
+  filterToggle.addEventListener("click", () => {
+
+    filterBox.classList.toggle("filter-closed");
+
+    const arrow = document.getElementById("filterArrow");
+
+    if (filterBox.classList.contains("filter-closed")) {
+      arrow.textContent = "▲";
+    } else {
+      arrow.textContent = "▼";
+    }
+
+  });
+
+}
 /* ================= MOBILE MENU ================= */
 
 const menuToggle = document.getElementById("menuToggle");
