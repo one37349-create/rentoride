@@ -1,591 +1,587 @@
-/* ================= FILTER TOGGLE ================= */
+/* =========================================================
+   RentoRide — Bikes Page JS
+   ========================================================= */
 
-const filterToggle = document.getElementById("filterToggle");
-const filterBox = document.querySelector(".filter-box");
+document.addEventListener("DOMContentLoaded", () => {
 
-if (filterToggle && filterBox) {
+  const bikeGrid = document.getElementById("bikeGrid");
+  const bikeCards = Array.from(document.querySelectorAll(".bike-card"));
 
-  filterToggle.addEventListener("click", () => {
+  const bikeSearch = document.getElementById("bikeSearch");
+  const priceRange = document.getElementById("priceRange");
+  const priceValue = document.getElementById("priceValue");
 
-    filterBox.classList.toggle("filter-closed");
+  const sortBy = document.getElementById("sortBy");
 
-    const arrow = document.getElementById("filterArrow");
+  const filterToggle = document.getElementById("filterToggle");
+  const filterSidebar = document.getElementById("filterSidebar");
 
-    if (filterBox.classList.contains("filter-closed")) {
-      arrow.textContent = "▲";
-    } else {
-      arrow.textContent = "▼";
-    }
+  const clearFilters = document.getElementById("clearFilters");
+  const resetSearch = document.getElementById("resetSearch");
 
-  });
+  const availableOnly = document.getElementById("availableOnly");
 
-}
-/* ================= MOBILE MENU ================= */
+  const bikeCount = document.getElementById("bikeCount");
+  const noResults = document.getElementById("noResults");
 
-const menuToggle = document.getElementById("menuToggle");
-const navMenu = document.getElementById("navMenu");
 
-if (menuToggle && navMenu) {
+  /* =========================================================
+     FILTER TOGGLE
+     ========================================================= */
 
-  menuToggle.addEventListener("click", () => {
-    navMenu.classList.toggle("active");
-  });
+  if (filterToggle && filterSidebar) {
 
-  navMenu.querySelectorAll("a").forEach(link => {
+    filterToggle.addEventListener("click", () => {
 
-    link.addEventListener("click", () => {
-      navMenu.classList.remove("active");
+      filterSidebar.classList.toggle("open");
+      filterToggle.classList.toggle("open");
+
     });
 
-  });
-
-}
+  }
 
 
-  filterButton.className = "filter-toggle";
+  /* =========================================================
+     CHECKBOX HELPERS
+     ========================================================= */
 
-  filterButton.innerHTML = `
-    <span>⚙ FILTER OPTIONS</span>
-    <span>▲</span>
-  `;
+  function getCheckedValues(name) {
 
-  /* Put button at top */
-
-  filterBox.insertBefore(
-    filterButton,
-    filterBox.firstChild
-  );
-
-
-  /* Put all existing filter content inside wrapper */
-
-  const filterContent = document.createElement("div");
-
-  filterContent.className = "filter-content";
-
-
-  while (filterBox.children.length > 1) {
-
-    filterContent.appendChild(
-      filterBox.children[1]
-    );
+    return Array.from(
+      document.querySelectorAll(`input[name="${name}"]:checked`)
+    ).map(input => input.value);
 
   }
 
 
-  filterBox.appendChild(filterContent);
+  /* =========================================================
+     BIKE FILTER
+     ========================================================= */
+
+  function filterBikes() {
+
+    const searchText =
+      bikeSearch.value.trim().toLowerCase();
+
+    const maxPrice =
+      Number(priceRange.value);
+
+    const selectedTypes =
+      getCheckedValues("bikeType");
+
+    const selectedFuel =
+      getCheckedValues("fuelType");
+
+    const selectedRatings =
+      getCheckedValues("rating");
+
+    const onlyAvailable =
+      availableOnly.checked;
 
 
-  /* Toggle */
+    let visibleCards = [];
 
-  filterButton.addEventListener("click", () => {
 
-    filterBox.classList.toggle("collapsed");
+    bikeCards.forEach(card => {
 
-    const arrow =
-      filterButton.querySelector("span:last-child");
+      const name =
+        (card.dataset.name || "").toLowerCase();
 
-    if (filterBox.classList.contains("collapsed")) {
+      const type =
+        card.dataset.type || "";
 
-      arrow.textContent = "▼";
+      const fuel =
+        card.dataset.fuel || "";
+
+      const price =
+        Number(card.dataset.price || 0);
+
+      const rating =
+        Number(card.dataset.rating || 0);
+
+      const isAvailable =
+        card.dataset.available === "true";
+
+
+      /* SEARCH */
+
+      const matchesSearch =
+        !searchText ||
+        name.includes(searchText);
+
+
+      /* BIKE TYPE */
+
+      const matchesType =
+        selectedTypes.length === 0 ||
+        selectedTypes.includes("all") ||
+        selectedTypes.includes(type);
+
+
+      /* FUEL */
+
+      const matchesFuel =
+        selectedFuel.length === 0 ||
+        selectedFuel.includes("all") ||
+        selectedFuel.includes(fuel);
+
+
+      /* PRICE */
+
+      const matchesPrice =
+        price <= maxPrice;
+
+
+      /* RATING */
+
+      let matchesRating = true;
+
+      if (selectedRatings.length > 0) {
+
+        matchesRating =
+          selectedRatings.some(minRating => {
+
+            return rating >= Number(minRating);
+
+          });
+
+      }
+
+
+      /* AVAILABILITY */
+
+      const matchesAvailability =
+        !onlyAvailable ||
+        isAvailable;
+
+
+      /* FINAL RESULT */
+
+      const show =
+        matchesSearch &&
+        matchesType &&
+        matchesFuel &&
+        matchesPrice &&
+        matchesRating &&
+        matchesAvailability;
+
+
+      if (show) {
+
+        card.style.display = "";
+
+        visibleCards.push(card);
+
+      } else {
+
+        card.style.display = "none";
+
+      }
+
+    });
+
+
+    updateCount(visibleCards.length);
+
+    noResults.style.display =
+      visibleCards.length === 0
+        ? "block"
+        : "none";
+
+  }
+
+
+  /* =========================================================
+     COUNT
+     ========================================================= */
+
+  function updateCount(count) {
+
+    bikeCount.textContent =
+      `${count} Bike${count === 1 ? "" : "s"}`;
+
+  }
+
+
+  /* =========================================================
+     PRICE RANGE
+     ========================================================= */
+
+  function updatePriceText() {
+
+    const value =
+      Number(priceRange.value);
+
+    if (value >= Number(priceRange.max)) {
+
+      priceValue.textContent = "₹2000+";
 
     } else {
 
-      arrow.textContent = "▲";
+      priceValue.textContent = `₹${value}`;
 
     }
 
-  });
-
-}
+  }
 
 
-/* ================= DATE ================= */
+  priceRange.addEventListener(
+    "input",
+    () => {
 
-const pickupDate =
-  document.getElementById("pickupDate");
+      updatePriceText();
+      filterBikes();
 
-if (pickupDate) {
-
-  const today =
-    new Date().toISOString().split("T")[0];
-
-  pickupDate.min = today;
-
-}
-
-
-/* ================= ELEMENTS ================= */
-
-const bikeGrid =
-  document.getElementById("bikeGrid");
-
-const bikeCards =
-  Array.from(
-    document.querySelectorAll(".bike-card")
+    }
   );
 
-const bikeSearch =
-  document.getElementById("bikeSearch");
 
-const priceRange =
-  document.getElementById("priceRange");
-
-const availableOnly =
-  document.getElementById("availableOnly");
-
-const sortSelect =
-  document.getElementById("sortSelect");
-
-const bikeCount =
-  document.getElementById("bikeCount");
-
-const noResults =
-  document.getElementById("noResults");
-
-const locationInput =
-  document.getElementById("locationInput");
-
-const locationTitle =
-  document.getElementById("locationTitle");
-
-let selectedRating = 0;
-
-
-/* ================= FILTER FUNCTION ================= */
-
-function filterBikes() {
-
-  const searchValue =
-    bikeSearch
-      ? bikeSearch.value.toLowerCase().trim()
-      : "";
-
-  const maxPrice =
-    priceRange
-      ? Number(priceRange.value)
-      : 2000;
-
-  const onlyAvailable =
-    availableOnly
-      ? availableOnly.checked
-      : false;
-
-
-  let visibleCards = [];
-
-
-  bikeCards.forEach(card => {
-
-    const name =
-      (card.dataset.name || "").toLowerCase();
-
-    const price =
-      Number(card.dataset.price || 0);
-
-    const rating =
-      Number(card.dataset.rating || 0);
-
-    const available =
-      card.dataset.available === "true";
-
-
-    let show = true;
-
-
-    /* SEARCH */
-
-    if (
-      searchValue &&
-      !name.includes(searchValue)
-    ) {
-      show = false;
-    }
-
-
-    /* PRICE */
-
-    if (price > maxPrice) {
-      show = false;
-    }
-
-
-    /* RATING */
-
-    if (rating < selectedRating) {
-      show = false;
-    }
-
-
-    /* AVAILABILITY */
-
-    if (
-      onlyAvailable &&
-      !available
-    ) {
-      show = false;
-    }
-
-
-    card.style.display =
-      show ? "" : "none";
-
-
-    if (show) {
-      visibleCards.push(card);
-    }
-
-  });
-
-
-  /* COUNT */
-
-  if (bikeCount) {
-
-    bikeCount.textContent =
-      `${visibleCards.length} Bikes available`;
-
-  }
-
-
-  /* NO RESULTS */
-
-  if (noResults) {
-
-    noResults.classList.toggle(
-      "show",
-      visibleCards.length === 0
-    );
-
-  }
-
-}
-
-
-/* ================= SEARCH ================= */
-
-if (bikeSearch) {
+  /* =========================================================
+     SEARCH
+     ========================================================= */
 
   bikeSearch.addEventListener(
     "input",
     filterBikes
   );
 
-}
+
+  /* =========================================================
+     BIKE TYPE
+     ========================================================= */
+
+  document
+    .querySelectorAll('input[name="bikeType"]')
+    .forEach(input => {
+
+      input.addEventListener("change", () => {
+
+        const all =
+          document.querySelector(
+            'input[name="bikeType"][value="all"]'
+          );
+
+        const specific =
+          document.querySelectorAll(
+            'input[name="bikeType"]:not([value="all"]):checked'
+          );
 
 
-/* ================= PRICE ================= */
+        if (input.value === "all" && input.checked) {
 
-if (priceRange) {
+          document
+            .querySelectorAll(
+              'input[name="bikeType"]:not([value="all"])'
+            )
+            .forEach(item => {
+              item.checked = false;
+            });
 
-  priceRange.addEventListener(
-    "input",
-    filterBikes
-  );
-
-}
+        }
 
 
-/* ================= AVAILABILITY ================= */
+        if (input.value !== "all" && input.checked) {
 
-if (availableOnly) {
+          all.checked = false;
+
+        }
+
+
+        if (specific.length === 0) {
+
+          all.checked = true;
+
+        }
+
+
+        filterBikes();
+
+      });
+
+    });
+
+
+  /* =========================================================
+     FUEL TYPE
+     ========================================================= */
+
+  document
+    .querySelectorAll('input[name="fuelType"]')
+    .forEach(input => {
+
+      input.addEventListener("change", () => {
+
+        const all =
+          document.querySelector(
+            'input[name="fuelType"][value="all"]'
+          );
+
+        const specific =
+          document.querySelectorAll(
+            'input[name="fuelType"]:not([value="all"]):checked'
+          );
+
+
+        if (input.value === "all" && input.checked) {
+
+          document
+            .querySelectorAll(
+              'input[name="fuelType"]:not([value="all"])'
+            )
+            .forEach(item => {
+              item.checked = false;
+            });
+
+        }
+
+
+        if (input.value !== "all" && input.checked) {
+
+          all.checked = false;
+
+        }
+
+
+        if (specific.length === 0) {
+
+          all.checked = true;
+
+        }
+
+
+        filterBikes();
+
+      });
+
+    });
+
+
+  /* =========================================================
+     RATING
+     ========================================================= */
+
+  document
+    .querySelectorAll('input[name="rating"]')
+    .forEach(input => {
+
+      input.addEventListener(
+        "change",
+        filterBikes
+      );
+
+    });
+
+
+  /* =========================================================
+     AVAILABILITY
+     ========================================================= */
 
   availableOnly.addEventListener(
     "change",
     filterBikes
   );
 
-}
+
+  /* =========================================================
+     SORT
+     ========================================================= */
+
+  sortBy.addEventListener("change", () => {
+
+    const cards =
+      Array.from(
+        bikeGrid.querySelectorAll(".bike-card")
+      );
 
 
-/* ================= RATING ================= */
-
-document
-  .querySelectorAll(".rating-filter")
-  .forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      document
-        .querySelectorAll(".rating-filter")
-        .forEach(btn => {
-
-          btn.classList.remove("active");
-
-        });
+    const sort =
+      sortBy.value;
 
 
-      button.classList.add("active");
+    cards.sort((a, b) => {
+
+      const priceA =
+        Number(a.dataset.price || 0);
+
+      const priceB =
+        Number(b.dataset.price || 0);
+
+      const ratingA =
+        Number(a.dataset.rating || 0);
+
+      const ratingB =
+        Number(b.dataset.rating || 0);
 
 
-      selectedRating =
-        Number(button.dataset.rating);
+      if (sort === "priceLow") {
+
+        return priceA - priceB;
+
+      }
 
 
-      filterBikes();
+      if (sort === "priceHigh") {
+
+        return priceB - priceA;
+
+      }
+
+
+      if (sort === "rating") {
+
+        return ratingB - ratingA;
+
+      }
+
+
+      return 0;
+
+    });
+
+
+    cards.forEach(card => {
+
+      bikeGrid.appendChild(card);
 
     });
 
   });
 
 
-/* ================= SORT ================= */
-
-if (sortSelect && bikeGrid) {
-
-  sortSelect.addEventListener(
-    "change",
-    () => {
-
-      const cards =
-        Array.from(
-          document.querySelectorAll(".bike-card")
-        );
-
-
-      const type =
-        sortSelect.value;
-
-
-      cards.sort((a, b) => {
-
-        const priceA =
-          Number(a.dataset.price || 0);
-
-        const priceB =
-          Number(b.dataset.price || 0);
-
-        const ratingA =
-          Number(a.dataset.rating || 0);
-
-        const ratingB =
-          Number(b.dataset.rating || 0);
-
-
-        if (type === "priceLow") {
-          return priceA - priceB;
-        }
-
-
-        if (type === "priceHigh") {
-          return priceB - priceA;
-        }
-
-
-        if (type === "rating") {
-          return ratingB - ratingA;
-        }
-
-
-        return 0;
-
-      });
-
-
-      cards.forEach(card => {
-
-        bikeGrid.appendChild(card);
-
-      });
-
-
-      filterBikes();
-
-    }
-  );
-
-}
-
-
-/* ================= LOCATION SEARCH ================= */
-
-const searchBtn =
-  document.getElementById("searchBtn");
-
-if (searchBtn) {
-
-  searchBtn.addEventListener(
-    "click",
-    () => {
-
-      const location =
-        locationInput
-          ? locationInput.value.trim()
-          : "";
-
-
-      if (location && locationTitle) {
-
-        locationTitle.textContent =
-          location.split(",")[0];
-
-      }
-
-
-      filterBikes();
-
-
-      document
-        .querySelector(".listing-section")
-        ?.scrollIntoView({
-          behavior: "smooth"
-        });
-
-    }
-  );
-
-}
-
-
-/* ================= CLEAR FILTERS ================= */
-
-const clearFilters =
-  document.getElementById("clearFilters");
-
-if (clearFilters) {
-
-  clearFilters.addEventListener(
-    "click",
-    () => {
-
-      if (bikeSearch) {
-        bikeSearch.value = "";
-      }
-
-
-      if (priceRange) {
-        priceRange.value = 2000;
-      }
-
-
-      if (availableOnly) {
-        availableOnly.checked = true;
-      }
-
-
-      selectedRating = 0;
-
-
-      document
-        .querySelectorAll(".rating-filter")
-        .forEach(button => {
-
-          button.classList.remove("active");
-
-          if (
-            button.dataset.rating === "0"
-          ) {
-
-            button.classList.add("active");
-
-          }
-
-        });
-
-
-      document
-        .querySelectorAll(
-          '.filter-group input[type="checkbox"]'
-        )
-        .forEach(checkbox => {
-
-          if (checkbox.value === "all") {
-            checkbox.checked = true;
-          }
-
-        });
-
-
-      filterBikes();
-
-    }
-  );
-
-}
-
-
-/* ================= FAVORITES ================= */
-
-document
-  .querySelectorAll(".favorite")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
+  /* =========================================================
+     FAVORITE BUTTON
+     ========================================================= */
+
+  document
+    .querySelectorAll(".favorite")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
 
         button.classList.toggle("liked");
 
-        button.textContent =
-          button.classList.contains("liked")
-            ? "♥"
-            : "♡";
+        if (button.classList.contains("liked")) {
 
-      }
-    );
+          button.textContent = "♥";
 
-  });
+        } else {
+
+          button.textContent = "♡";
+
+        }
+
+      });
+
+    });
 
 
-/* ================= URL PARAMETERS ================= */
+  /* =========================================================
+     CLEAR FILTERS
+     ========================================================= */
 
-const urlParams =
-  new URLSearchParams(
-    window.location.search
+  function resetFilters() {
+
+    /* Search */
+
+    bikeSearch.value = "";
+
+
+    /* Price */
+
+    priceRange.value =
+      priceRange.max;
+
+    updatePriceText();
+
+
+    /* Bike Type */
+
+    document
+      .querySelectorAll('input[name="bikeType"]')
+      .forEach(input => {
+
+        input.checked =
+          input.value === "all";
+
+      });
+
+
+    /* Fuel */
+
+    document
+      .querySelectorAll('input[name="fuelType"]')
+      .forEach(input => {
+
+        input.checked =
+          input.value === "all";
+
+      });
+
+
+    /* Rating */
+
+    document
+      .querySelectorAll('input[name="rating"]')
+      .forEach(input => {
+
+        input.checked = false;
+
+      });
+
+
+    /* Availability */
+
+    availableOnly.checked = true;
+
+
+    /* Sort */
+
+    sortBy.value = "popular";
+
+
+    /* Show cards */
+
+    bikeCards.forEach(card => {
+
+      card.style.display = "";
+
+    });
+
+
+    updateCount(bikeCards.length);
+
+    noResults.style.display = "none";
+
+
+    /* Reset original order */
+
+    bikeCards.forEach(card => {
+
+      bikeGrid.appendChild(card);
+
+    });
+
+  }
+
+
+  clearFilters.addEventListener(
+    "click",
+    resetFilters
   );
 
-const urlLocation =
-  urlParams.get("location");
 
-const urlDate =
-  urlParams.get("date");
-
-const urlTime =
-  urlParams.get("time");
+  resetSearch.addEventListener(
+    "click",
+    resetFilters
+  );
 
 
-if (urlLocation && locationInput) {
+  /* =========================================================
+     INITIAL LOAD
+     ========================================================= */
 
-  locationInput.value =
-    urlLocation;
+  updatePriceText();
 
-  if (locationTitle) {
+  filterBikes();
 
-    locationTitle.textContent =
-      urlLocation.split(",")[0];
-
-  }
-
-}
-
-
-if (urlDate && pickupDate) {
-
-  pickupDate.value =
-    urlDate;
-
-}
-
-
-if (urlTime) {
-
-  const pickupTime =
-    document.getElementById("pickupTime");
-
-  if (pickupTime) {
-
-    pickupTime.value =
-      urlTime;
-
-  }
-
-}
-
-
-/* ================= INITIAL LOAD ================= */
-
-filterBikes();
-
-console.log(
-  "RentoRide Bikes Page Loaded Successfully"
-);
+});
