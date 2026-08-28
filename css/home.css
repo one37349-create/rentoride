@@ -1,3 +1,71 @@
+/* ================= DESKTOP FILTER + BIKE LAYOUT FIX ================= */
+
+@media (min-width: 801px) {
+
+  .page-container {
+    display: grid !important;
+    grid-template-columns: 240px minmax(0, 1fr) !important;
+    gap: 25px !important;
+    width: min(1280px, 94%) !important;
+    margin: 0 auto !important;
+  }
+
+  .filter-box {
+    grid-column: 1 !important;
+    width: 100% !important;
+  }
+
+  .listing-section {
+    grid-column: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .bike-grid {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 15px !important;
+  }
+
+  .bike-card {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+}
+
+
+/* ================= FILTER OPEN / CLOSE ================= */
+
+.filter-box.filter-closed .filter-heading,
+.filter-box.filter-closed .filter-group {
+  display: none !important;
+}
+
+.filter-toggle {
+  width: 100%;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 0;
+  background: #111;
+  color: white;
+
+  padding: 0 14px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.filter-toggle span:last-child {
+  color: #fbc02d;
+}
 * {
   margin: 0;
   padding: 0;
